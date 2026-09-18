@@ -37,6 +37,7 @@ Transformer une demo CS2 terminee en un debrief individuel clair, actionnable et
 17. [Strategie de corpus joueurs](docs/14_strategie_corpus_joueurs.md) - collecte cible et recalibration des seuils.
 18. [Go / no-go alpha](docs/15_go_no_go_alpha.md) - ce qui autorise le debut du code et ce qui reste reporte a la beta.
 19. [Cadre de livraison](docs/16_cadre_de_livraison.md) - backlog, Definition of Done, tests, GitHub et metriques.
+20. Le cycle de livraison applique le TDD : test qui echoue, implementation minimale, refactorisation, controles locaux puis CI verte avant fusion.
 
 ## Decision provisoire de produit
 

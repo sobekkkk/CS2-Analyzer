@@ -8,7 +8,10 @@ __pycache__/
 .coverage
 htmlcov/
 node_modules/
+.pnpm-store/
 dist/
+playwright-report/
+test-results/
 .venv/
 *.egg-info/
 .env
