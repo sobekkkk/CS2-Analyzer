@@ -18,6 +18,8 @@ pnpm dev
 
 L'interface est disponible sur `http://localhost:5173`. L'API doit etre demarree sur `http://127.0.0.1:8000` pour importer une demo et consulter une analyse.
 
+Pendant le developpement, Vite relaie automatiquement les appels `/api` vers cette API locale : aucun service externe ni reglage CORS n'est necessaire.
+
 ## Controles qualite
 
 ```powershell
