@@ -4,8 +4,10 @@
 
 ## Tests
 
-- [ ] Tests unitaires / integration ajoutes ou adaptes
-- [ ] CI locale verte
+- [ ] Test automatise ecrit avant l'implementation et echec constate (ou exception sans comportement expliquee)
+- [ ] Tests unitaires / integration / contrat ajoutes ou adaptes
+- [ ] Test d'interface automatise ajoute ou adapte pour tout parcours utilisateur modifie
+- [ ] Tous les controles locaux pertinents sont verts
 - [ ] Validation sur fixture ou demo reelle indiquee
 
 ## Risques et exploitation

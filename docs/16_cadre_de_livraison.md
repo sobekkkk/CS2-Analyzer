@@ -25,6 +25,22 @@ Une story peut commencer si elle contient :
 - exemple de demo ou fixture permettant de la tester ;
 - dependances et risque principal connus ;
 - comportement attendu en cas de donnees insuffisantes.
+- niveau de test automatise attendu et exemple observable de sortie (contrat API, regle ou parcours interface).
+
+## Regle TDD : red -> green -> refactor
+
+Chaque changement de comportement suit ce cycle, y compris lorsqu'il est developpe avec une IA :
+
+1. ecrire le critere d'acceptation et l'exemple concret de sortie attendue ;
+2. ecrire le test automatise correspondant **avant** l'implementation et constater son echec ;
+3. implementer le minimum necessaire pour le faire passer ;
+4. refactorer seulement avec toute la suite verte ;
+5. executer les controles locaux pertinents avant le push ;
+6. pousser une branche courte, laisser la CI refaire les memes controles, puis ne fusionner que si elle est verte.
+
+Un bug constate sur une vraie demo commence par un test de non-regression qui reproduit le cas, puis seulement par le correctif. Les fixtures sont pseudonymisees et minimales : aucune demo brute ne sert de donnee de CI.
+
+Le TDD ne remplace pas une validation manuelle de l'interface ni une lecture de replay ; il garantit que les comportements deja specifies ou deja rencontres ne regressent pas silencieusement.
 
 ## Definition of Done
 
@@ -32,12 +48,13 @@ Une fonctionnalite n'est terminee que si :
 
 1. le code est relu et reste limite au besoin ;
 2. les tests unitaires et d'integration pertinents passent ;
-3. les contrats API et la documentation changent avec le code ;
-4. lint et formatage sont verts ;
-5. les donnees sensibles restent locales et pseudonymisees ;
-6. le rollback ou la suppression locale sont compris ;
-7. une demonstration sur une vraie demo est faite quand la fonctionnalite touche le parsing ou les regles ;
-8. l'observabilite minimale existe : erreur structuree, version de regle et hash de source.
+3. le test ayant defini le comportement a ete ecrit avant le code, ou l'exception (documentation, style sans comportement) est justifiee dans la PR ;
+4. les contrats API et la documentation changent avec le code ;
+5. lint et formatage sont verts ;
+6. les donnees sensibles restent locales et pseudonymisees ;
+7. le rollback ou la suppression locale sont compris ;
+8. une demonstration sur une vraie demo est faite quand la fonctionnalite touche le parsing ou les regles ;
+9. l'observabilite minimale existe : erreur structuree, version de regle et hash de source.
 
 ## Pyramide de tests
 
@@ -46,7 +63,7 @@ Une fonctionnalite n'est terminee que si :
 | Unitaire | Obligatoire pour les regles, validations, transformations et securite de chemin |
 | Integration | Obligatoire pour parser, stockage Parquet, API locale et staging temporaire |
 | Contrat | OpenAPI fige avant branchement du front ; rupture intentionnelle documentee |
-| E2E | Import -> selection -> rapport, avec Playwright des que le front existe |
+| E2E | Import -> selection -> rapport, avec Playwright dans Chromium ; API mockee pour rendre le parcours deterministe |
 | Accessibilite | Navigation clavier et assertions axe sur les parcours critiques front |
 | Acceptation | Demo reelle et criteres de story, avec retour joueur a la beta |
 
@@ -55,7 +72,7 @@ La couverture est suivie comme signal secondaire. Aucun seuil global ne remplace
 ## Qualite et securite
 
 - Backend : `ruff check`, `ruff format --check`, `pytest` a chaque PR et dans la CI.
-- Frontend : lint TypeScript, tests de composants, Playwright et tests d'accessibilite a chaque parcours critique.
+- Frontend : lint TypeScript, tests de composants, Playwright dans Chromium et tests d'accessibilite a chaque parcours critique.
 - Les demos et SteamID bruts ne sont ni commits ni envoyes dans la CI.
 - Les dependances et les actions GitHub sont versionnees et revues.
 - Toute vulnerabilite est traitee en dehors des issues publiques ; la politique `SECURITY.md` sera ecrite apres confirmation explicite du perimetre de signalement et de severite.
@@ -71,7 +88,7 @@ La couverture est suivie comme signal secondaire. Aucun seuil global ne remplace
 Apres le premier push, la configuration GitHub a appliquer sur `main` est :
 
 - pull request obligatoire ; activer une approbation obligatoire des l'arrivee d'un second contributeur ;
-- controle CI `quality` obligatoire et branche a jour avant fusion ;
+- controles CI `API quality and tests`, `Web quality and tests` et `Web end-to-end tests` obligatoires et branche a jour avant fusion ;
 - pas de force-push, pas de suppression de branche par erreur ;
 - revues CODEOWNERS obligatoires des qu'il y a plus d'un contributeur.
 
