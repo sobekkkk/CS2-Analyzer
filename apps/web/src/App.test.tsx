@@ -83,5 +83,6 @@ describe("App", () => {
     expect(screen.getByRole("button", { name: "Voir la timeline du round 1" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Où vous êtes après un avantage 5v4" })).toBeVisible();
     expect(screen.getByLabelText(/Cellule 1, -2, 3 positions observées après un 5v4/i)).toBeVisible();
+    expect(screen.getByLabelText("Carte de grille monde : positions après un avantage 5v4")).toBeVisible();
   });
 });
