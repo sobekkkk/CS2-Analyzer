@@ -18,7 +18,12 @@ from .models import (
 from .normalization import DemoNormalizer
 from .profile import LocalProfileStore
 from .report import build_match_overview, timeline_for_match
-from .rules import DamageCell, damage_cells_for_player
+from .rules import (
+    DamageCell,
+    UntradedDeathCell,
+    damage_cells_for_player,
+    untraded_death_cells_for_player,
+)
 from .staging import PendingAnalysisStore
 from .storage import LocalMatchStore
 
@@ -80,6 +85,23 @@ def damage_heatmap(
     return damage_cells_for_player(
         stored.match.damages,
         stored.selected_player_id,
+        cell_size=cell_size,
+    )
+
+
+@app.get(
+    "/api/v1/matches/{match_id}/heatmaps/untraded-deaths",
+    response_model=list[UntradedDeathCell],
+    responses={404: {"model": ErrorResponse}},
+)
+def untraded_death_heatmap(
+    match_id: str, cell_size: int = Query(default=256, ge=1, le=2_048)
+) -> list[UntradedDeathCell]:
+    stored = _stored_match_or_404(match_id)
+    return untraded_death_cells_for_player(
+        stored.match.kills,
+        stored.selected_player_id,
+        tick_interval_seconds=stored.match.inspection.tick_interval_seconds,
         cell_size=cell_size,
     )
 

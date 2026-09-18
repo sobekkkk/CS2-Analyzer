@@ -93,6 +93,9 @@ class DemoNormalizer:
             "killer_team",
             "victim_team",
             "weapon",
+            "victim_x",
+            "victim_y",
+            "victim_z",
         ]
         records = []
         for event in events[events["tick"] >= start_tick].to_dict("records"):
@@ -114,6 +117,15 @@ class DemoNormalizer:
                         if not pd.isna(event.get("user_team_num"))
                         else None,
                         "weapon": str(event.get("weapon") or "unknown"),
+                        "victim_x": float(event["user_X"])
+                        if not pd.isna(event.get("user_X"))
+                        else None,
+                        "victim_y": float(event["user_Y"])
+                        if not pd.isna(event.get("user_Y"))
+                        else None,
+                        "victim_z": float(event["user_Z"])
+                        if not pd.isna(event.get("user_Z"))
+                        else None,
                     }
                 )
         return pd.DataFrame(records, columns=columns) if records else _empty(columns)
