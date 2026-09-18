@@ -55,9 +55,35 @@ def test_store_writes_only_derived_tables(tmp_path) -> None:
                 }
             ]
         ),
+        player_samples=pd.DataFrame(
+            [
+                {
+                    "player_id": "player-a",
+                    "tick": 96,
+                    "team_num": 2,
+                    "is_alive": True,
+                    "x": 128.0,
+                    "y": -256.0,
+                }
+            ]
+        ),
     )
-    destination = LocalMatchStore(tmp_path).save(match, "player-a")
+    store = LocalMatchStore(tmp_path)
+    destination = store.save(match, "player-a")
     assert (destination / "metadata.json").is_file()
     assert (destination / "rounds.parquet").is_file()
     assert (destination / "kills.parquet").is_file()
+    assert (destination / "player_samples.parquet").is_file()
     assert not list(destination.glob("*.dem"))
+    loaded = store.load("a" * 16)
+    assert loaded is not None
+    assert loaded.match.player_samples.to_dict("records") == [
+        {
+            "player_id": "player-a",
+            "tick": 96,
+            "team_num": 2,
+            "is_alive": True,
+            "x": 128.0,
+            "y": -256.0,
+        }
+    ]

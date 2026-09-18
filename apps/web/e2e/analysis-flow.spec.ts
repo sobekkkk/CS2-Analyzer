@@ -41,6 +41,11 @@ test("a local import reaches the player report without a real demo upload", asyn
   await page.route("**/api/v1/matches/match-1/highlights/opening-kills", async (route) => {
     await route.fulfill({ json: [{ round_number: 0, tick: 80, weapon: "ak47", killer_team: 2, confidence: "direct" }] });
   });
+  await page.route("**/api/v1/matches/match-1/heatmaps/five-vs-four", async (route) => {
+    await route.fulfill({
+      json: [{ cell_x: 1, cell_y: -2, sample_count: 3, round_count: 2, round_numbers: [3, 7] }]
+    });
+  });
 
   await page.goto("/");
   await page.getByLabel("Importer une démo CS2").setInputFiles({
@@ -53,6 +58,8 @@ test("a local import reaches the player report without a real demo upload", asyn
   await expect(page.getByRole("heading", { name: "Sobek" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Où vos morts ne sont pas suivies d’un trade" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Vos premiers kills" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Où vous êtes après un avantage 5v4" })).toBeVisible();
+  await expect(page.getByLabel(/Cellule 1, -2, 3 positions observées après un 5v4/i)).toBeVisible();
   const openingKill = page.getByRole("button", { name: "Voir la timeline du round 1" });
   await expect(openingKill).toBeVisible();
   await openingKill.click();

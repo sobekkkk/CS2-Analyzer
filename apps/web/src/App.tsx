@@ -4,12 +4,14 @@ import { Button } from "react-aria-components";
 import {
   choosePlayer,
   getDamageCells,
+  getFiveVFourCells,
   getOpeningKills,
   getOverview,
   getTimeline,
   getUntradedDeathCells,
   inspectDemo,
   type DamageCell,
+  type FiveVFourCell,
   type MatchOverview,
   type OpeningKill,
   type Participant,
@@ -31,6 +33,7 @@ type ViewState =
       damageCells: DamageCell[];
       untradedDeathCells: UntradedDeathCell[];
       openingKills: OpeningKill[];
+      fiveVFourCells: FiveVFourCell[];
       selectedRound: number | undefined;
     }
   | { kind: "error"; message: string };
@@ -108,6 +111,27 @@ function UntradedDeathGrid({ cells }: { cells: UntradedDeathCell[] }) {
   );
 }
 
+function FiveVFourGrid({ cells }: { cells: FiveVFourCell[] }) {
+  if (cells.length === 0) {
+    return <p className="empty-copy">Aucune position fiable après un avantage 5v4 dans cette démo.</p>;
+  }
+  return (
+    <div className="zone-grid" aria-label="Grille des positions après un avantage 5v4">
+      {cells.map((cell) => (
+        <article
+          className="zone-cell zone-cell--advantage"
+          key={`${cell.cell_x}-${cell.cell_y}`}
+          aria-label={`Cellule ${cell.cell_x}, ${cell.cell_y}, ${cell.sample_count} positions observées après un 5v4`}
+        >
+          <span className="zone-coordinates">{cell.cell_x} / {cell.cell_y}</span>
+          <strong>{cell.sample_count} <small>position{cell.sample_count > 1 ? "s" : ""}</small></strong>
+          <span>{cell.round_count} round{cell.round_count > 1 ? "s" : ""} · après 5v4</span>
+        </article>
+      ))}
+    </div>
+  );
+}
+
 function OpeningKillList({
   kills,
   onOpenRound
@@ -148,12 +172,13 @@ export function App() {
   );
 
   async function loadReport(matchId: string, filename: string) {
-    const [overview, timeline, damageCells, untradedDeathCells, openingKills] = await Promise.all([
+    const [overview, timeline, damageCells, untradedDeathCells, openingKills, fiveVFourCells] = await Promise.all([
       getOverview(matchId),
       getTimeline(matchId),
       getDamageCells(matchId),
       getUntradedDeathCells(matchId),
-      getOpeningKills(matchId)
+      getOpeningKills(matchId),
+      getFiveVFourCells(matchId)
     ]);
     setView({
       kind: "ready",
@@ -163,6 +188,7 @@ export function App() {
       damageCells,
       untradedDeathCells,
       openingKills,
+      fiveVFourCells,
       selectedRound: undefined
     });
   }
@@ -338,6 +364,15 @@ export function App() {
                 </div>
                 <p className="panel-description">Chaque élément est le premier kill ennemi du round. Ouvrez le round pour relire la séquence.</p>
                 <OpeningKillList kills={activeReport.openingKills} onOpenRound={(roundNumber) => void selectRound(roundNumber)} />
+              </section>
+
+              <section className="panel panel--five-v-four">
+                <div className="panel-heading">
+                  <div><p className="eyebrow">H-03 · Confiance inférée</p><h2>Où vous êtes après un avantage 5v4</h2></div>
+                  <span className="grid-key">Grille monde</span>
+                </div>
+                <p className="panel-description">Positions relevées chaque seconde pendant les six secondes qui suivent un passage exact à 5v4, jusqu’au frag suivant ou à la fin du round. Ce contexte ne qualifie pas une décision.</p>
+                <FiveVFourGrid cells={activeReport.fiveVFourCells} />
               </section>
             </div>
           </>

@@ -51,6 +51,14 @@ export type OpeningKill = {
   confidence: "direct";
 };
 
+export type FiveVFourCell = {
+  cell_x: number;
+  cell_y: number;
+  sample_count: number;
+  round_count: number;
+  round_numbers: number[];
+};
+
 export class ApiError extends Error {
   constructor(message: string) {
     super(message);
@@ -102,4 +110,8 @@ export function getUntradedDeathCells(matchId: string): Promise<UntradedDeathCel
 
 export function getOpeningKills(matchId: string): Promise<OpeningKill[]> {
   return request(`/matches/${matchId}/highlights/opening-kills`);
+}
+
+export function getFiveVFourCells(matchId: string): Promise<FiveVFourCell[]> {
+  return request(`/matches/${matchId}/heatmaps/five-vs-four`);
 }

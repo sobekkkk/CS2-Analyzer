@@ -65,6 +65,7 @@ button { cursor: pointer; }
 .zone-cell--tone-2 { background: #4a4938; border-color: #7c7347; }
 .zone-cell--tone-3 { background: #604833; border-color: #b17448; }
 .zone-cell--trade { background: #3b2f32; border-color: #80545a; }
+.zone-cell--advantage { background: #20363a; border-color: #3b6972; }
 .zone-cell span { color: #b7c1c4; display: block; font-size: 11px; line-height: 1.45; }
 .zone-cell strong { color: #f4f6f6; display: block; font-size: 24px; font-variant-numeric: tabular-nums; letter-spacing: -.03em; margin: 13px 0 7px; }
 .zone-cell small { font-size: 11px; letter-spacing: .04em; }
@@ -72,6 +73,7 @@ button { cursor: pointer; }
 .empty-copy { color: #99a5aa; line-height: 1.55; }
 .panel--untraded { grid-column: span 2; }
 .panel--opening-kills { grid-column: span 2; }
+.panel--five-v-four { grid-column: span 2; }
 .opening-kill-list { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); list-style: none; margin: 22px 0 0; padding: 0; }
 .opening-kill { background: #1b2930; border: 1px solid #3a5966; border-radius: 5px; color: #e8eff1; display: grid; gap: 5px; min-height: 92px; padding: 13px; text-align: left; width: 100%; }
 .opening-kill:hover { background: #203840; border-color: #5d9fba; }
@@ -83,7 +85,7 @@ button { cursor: pointer; }
   .page-heading, .report-heading { align-items: flex-start; flex-direction: column; }
   .metric-strip, .report-grid { grid-template-columns: 1fr 1fr; }
   .report-grid { gap: 14px; }
-  .panel--timeline, .panel--zones, .panel--untraded, .panel--opening-kills { grid-column: span 2; }
+  .panel--timeline, .panel--zones, .panel--untraded, .panel--opening-kills, .panel--five-v-four { grid-column: span 2; }
 }
 @media (max-width: 510px) {
   .topbar { height: 56px; }

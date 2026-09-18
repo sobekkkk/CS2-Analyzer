@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import pandas as pd
@@ -8,6 +8,7 @@ from demoparser2 import DemoParser
 
 from .inspection import DemoInspector, participant_id
 from .models import DemoInspection
+from .rules import five_v_four_sample_ticks
 
 
 @dataclass(frozen=True)
@@ -18,6 +19,11 @@ class CanonicalMatch:
     rounds: pd.DataFrame
     kills: pd.DataFrame
     damages: pd.DataFrame
+    player_samples: pd.DataFrame = field(
+        default_factory=lambda: pd.DataFrame(
+            columns=["player_id", "tick", "team_num", "is_alive", "x", "y"]
+        )
+    )
 
 
 def _round_number(value: object) -> int | None:
@@ -53,11 +59,22 @@ class DemoNormalizer:
             player=["team_num", "X", "Y", "Z"],
             other=["total_rounds_played"],
         )
+        rounds = self._normalize_rounds(round_ends, start_tick)
+        kills = self._normalize_kills(deaths, start_tick)
+        sample_ticks = five_v_four_sample_ticks(
+            kills, rounds, tick_interval_seconds=inspection.tick_interval_seconds
+        )
+        raw_player_samples = (
+            parser.parse_ticks(["X", "Y", "is_alive", "team_num"], ticks=sample_ticks)
+            if sample_ticks
+            else _empty(["tick", "steamid", "team_num", "is_alive", "X", "Y"])
+        )
         return CanonicalMatch(
             inspection=inspection,
-            rounds=self._normalize_rounds(round_ends, start_tick),
-            kills=self._normalize_kills(deaths, start_tick),
+            rounds=rounds,
+            kills=kills,
             damages=self._normalize_damages(hurts, start_tick),
+            player_samples=self._normalize_player_samples(raw_player_samples, start_tick),
         )
 
     @staticmethod
@@ -66,12 +83,12 @@ class DemoNormalizer:
         records = []
         for event in events[events["tick"] >= start_tick].to_dict("records"):
             round_number = _round_number(event.get("total_rounds_played"))
-            if round_number is not None:
+            if round_number is not None and round_number > 0:
                 winner = event.get("winner")
                 reason = event.get("reason")
                 records.append(
                     {
-                        "round_number": round_number,
+                        "round_number": round_number - 1,
                         "end_tick": int(event["tick"]),
                         "winner_side": str(winner)
                         if winner is not None and not pd.isna(winner)
@@ -187,6 +204,35 @@ class DemoNormalizer:
                     "victim_z": float(event["user_Z"])
                     if not pd.isna(event.get("user_Z"))
                     else None,
+                }
+            )
+        return pd.DataFrame(records, columns=columns) if records else _empty(columns)
+
+    @staticmethod
+    def _normalize_player_samples(events: pd.DataFrame, start_tick: int) -> pd.DataFrame:
+        """Conserve les positions rares utiles à H-03, jamais le SteamID brut."""
+        columns = ["player_id", "tick", "team_num", "is_alive", "x", "y"]
+        records = []
+        for event in events[events["tick"] >= start_tick].to_dict("records"):
+            player_id = _player_id(event.get("steamid"))
+            team_num = event.get("team_num")
+            is_alive = event.get("is_alive")
+            if (
+                player_id is None
+                or team_num is None
+                or pd.isna(team_num)
+                or is_alive is None
+                or pd.isna(is_alive)
+            ):
+                continue
+            records.append(
+                {
+                    "player_id": player_id,
+                    "tick": int(event["tick"]),
+                    "team_num": int(team_num),
+                    "is_alive": bool(is_alive),
+                    "x": float(event["X"]) if not pd.isna(event.get("X")) else None,
+                    "y": float(event["Y"]) if not pd.isna(event.get("Y")) else None,
                 }
             )
         return pd.DataFrame(records, columns=columns) if records else _empty(columns)

@@ -60,6 +60,15 @@ describe("App", () => {
             weapon: "ak47"
           }
         ]))
+        .mockImplementationOnce(() => response([
+          {
+            cell_x: 1,
+            cell_y: -2,
+            sample_count: 3,
+            round_count: 2,
+            round_numbers: [3, 7]
+          }
+        ]))
     );
 
     render(<App />);
@@ -72,5 +81,7 @@ describe("App", () => {
     expect(screen.getByLabelText(/Cellule 1, -2, 2 morts sans trade observées/i)).toBeVisible();
     expect(screen.getByRole("heading", { name: "Vos premiers kills" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Voir la timeline du round 1" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Où vous êtes après un avantage 5v4" })).toBeVisible();
+    expect(screen.getByLabelText(/Cellule 1, -2, 3 positions observées après un 5v4/i)).toBeVisible();
   });
 });

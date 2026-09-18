@@ -19,6 +19,9 @@ tables derivees via :
 - `GET /api/v1/matches/{match_id}/overview` ;
 - `GET /api/v1/matches/{match_id}/timeline?round_number=12` ;
 - `GET /api/v1/matches/{match_id}/heatmaps/damage?cell_size=256`.
+- `GET /api/v1/matches/{match_id}/heatmaps/five-vs-four?cell_size=256`.
 
 Les cellules de dommages sont des coordonnees monde agregees, pas encore des
-callouts ni un radar Mirage. Les fichiers `.dem` bruts ne sont pas conserves.
+callouts ni un radar Mirage. La carte 5v4 conserve uniquement les positions
+echantillonnees utiles a cette regle, jamais les ticks complets. Les fichiers
+`.dem` bruts ne sont pas conserves.

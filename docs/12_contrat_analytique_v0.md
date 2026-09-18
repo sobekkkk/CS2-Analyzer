@@ -143,7 +143,7 @@ Ne pas assimiler 4v3, 3v2 ou une simple superiorite numerique a un 5v4 dans le M
 
 ### Sorties produit
 
-La heatmap agrege positions, dommages recus et morts du joueur pendant ces fenetres. Le texte reste descriptif : "Apres un 5v4, tes morts sont concentrees ici". Il ne diagnostique aucune erreur de rotation avant la phase nav mesh.
+L'alpha actuel agrege les positions du joueur pendant ces fenetres ; les dommages recus et morts dans ces fenetres sont planifies mais ne sont pas encore restitues. Le texte reste descriptif et ne diagnostique aucune erreur de rotation avant la phase nav mesh.
 
 ## H-04 - Zones de HP perdus
 
