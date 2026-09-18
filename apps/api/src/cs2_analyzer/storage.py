@@ -38,11 +38,17 @@ class LocalMatchStore:
         match.rounds.to_parquet(destination / "rounds.parquet", index=False)
         match.kills.to_parquet(destination / "kills.parquet", index=False)
         match.damages.to_parquet(destination / "damages.parquet", index=False)
+        match.player_samples.to_parquet(destination / "player_samples.parquet", index=False)
         (destination / "manifest.json").write_text(
             json.dumps(
                 {
-                    "format_version": 1,
-                    "tables": ["rounds.parquet", "kills.parquet", "damages.parquet"],
+                    "format_version": 2,
+                    "tables": [
+                        "rounds.parquet",
+                        "kills.parquet",
+                        "damages.parquet",
+                        "player_samples.parquet",
+                    ],
                     "raw_demo_retained": False,
                 },
                 indent=2,
@@ -74,5 +80,12 @@ class LocalMatchStore:
                 rounds=pd.read_parquet(destination / "rounds.parquet"),
                 kills=pd.read_parquet(destination / "kills.parquet"),
                 damages=pd.read_parquet(destination / "damages.parquet"),
+                player_samples=(
+                    pd.read_parquet(destination / "player_samples.parquet")
+                    if (destination / "player_samples.parquet").is_file()
+                    else pd.DataFrame(
+                        columns=["player_id", "tick", "team_num", "is_alive", "x", "y"]
+                    )
+                ),
             ),
         )

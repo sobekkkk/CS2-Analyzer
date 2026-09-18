@@ -119,7 +119,7 @@ def test_exposes_saved_match_overview_and_filtered_timeline(tmp_path, monkeypatc
             [
                 {
                     "round_number": 1,
-                    "end_tick": 100,
+                    "end_tick": 200,
                     "winner_side": "T",
                     "end_reason": "t_killed",
                 },
@@ -171,6 +171,18 @@ def test_exposes_saved_match_overview_and_filtered_timeline(tmp_path, monkeypatc
                 }
             ]
         ),
+        player_samples=pd.DataFrame(
+            [
+                {
+                    "player_id": "target",
+                    "tick": 144,
+                    "team_num": 2,
+                    "is_alive": True,
+                    "x": 300.0,
+                    "y": -300.0,
+                }
+            ]
+        ),
     )
     store = LocalMatchStore(tmp_path)
     store.save(match, "target")
@@ -183,6 +195,9 @@ def test_exposes_saved_match_overview_and_filtered_timeline(tmp_path, monkeypatc
     opening_kills = client.get(f"/api/v1/matches/{'d' * 16}/highlights/opening-kills")
     untraded_death_cells = client.get(
         f"/api/v1/matches/{'d' * 16}/heatmaps/untraded-deaths?cell_size=256"
+    )
+    five_v_four_cells = client.get(
+        f"/api/v1/matches/{'d' * 16}/heatmaps/five-vs-four?cell_size=256"
     )
 
     assert overview.status_code == 200
@@ -213,3 +228,16 @@ def test_exposes_saved_match_overview_and_filtered_timeline(tmp_path, monkeypatc
     assert untraded_death_cells.json()[0]["occurrence_count"] == 1
     assert untraded_death_cells.json()[0]["cell_x"] == 1
     assert untraded_death_cells.json()[0]["cell_y"] == -2
+    assert five_v_four_cells.status_code == 200
+    assert five_v_four_cells.json() == [
+        {
+            "rule_id": "H-03",
+            "rule_version": "0.1",
+            "cell_x": 1,
+            "cell_y": -2,
+            "sample_count": 1,
+            "round_count": 1,
+            "round_numbers": [1],
+            "confidence": "inferred",
+        }
+    ]

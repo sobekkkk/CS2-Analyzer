@@ -20,9 +20,11 @@ from .profile import LocalProfileStore
 from .report import build_match_overview, timeline_for_match
 from .rules import (
     DamageCell,
+    FiveVFourCell,
     OpeningKill,
     UntradedDeathCell,
     damage_cells_for_player,
+    five_v_four_cells_for_player,
     opening_kills_for_player,
     untraded_death_cells_for_player,
 )
@@ -113,6 +115,26 @@ def untraded_death_heatmap(
     stored = _stored_match_or_404(match_id)
     return untraded_death_cells_for_player(
         stored.match.kills,
+        stored.selected_player_id,
+        tick_interval_seconds=stored.match.inspection.tick_interval_seconds,
+        cell_size=cell_size,
+    )
+
+
+@app.get(
+    "/api/v1/matches/{match_id}/heatmaps/five-vs-four",
+    response_model=list[FiveVFourCell],
+    responses={404: {"model": ErrorResponse}, 422: {"model": ErrorResponse}},
+)
+def five_v_four_heatmap(
+    match_id: str, cell_size: int = Query(default=256, ge=1, le=2_048)
+) -> list[FiveVFourCell]:
+    """Expose les positions d'un joueur encore vivant après le passage à 5v4."""
+    stored = _stored_match_or_404(match_id)
+    return five_v_four_cells_for_player(
+        stored.match.kills,
+        stored.match.rounds,
+        stored.match.player_samples,
         stored.selected_player_id,
         tick_interval_seconds=stored.match.inspection.tick_interval_seconds,
         cell_size=cell_size,

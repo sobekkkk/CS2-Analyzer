@@ -49,7 +49,7 @@ Le contrat complet est dans [`09_design_system.md`](09_design_system.md).
 - C1. Transformation coordonnees monde -> carte 2D pour de_mirage.
 - C2. H-01 morts sans trade. **Moteur, API et restitution alpha termines le 18 septembre 2026** : classification temporelle explicable (immediate, timely, late, untraded), carte de grille limitee aux morts non tradees avec au moins deux coequipiers vivants avant la mort, et lien vers les ticks sources. Le rendu rappelle explicitement qu'il ne prouve ni ligne de vue ni mauvaise decision.
 - C3. H-02 premiers kills. **Moteur, API et restitution alpha termines le 18 septembre 2026** : team-kills exclus, preuve directe, validation sur la demo `xSobek` ; chaque premier kill ouvre son round source dans la timeline. La position du tireur reste hors restitution tant que ce champ n'est pas normalise de facon fiable.
-- C4. H-03 fenetres 5v4.
+- C4. H-03 fenetres 5v4. **Moteur, stockage echantillonne, API et restitution alpha termines le 18 septembre 2026** : une fenetre s'ouvre exclusivement au passage exact a 5v4, s'arrete au frag suivant, a la fin du round ou apres six secondes, et ne conserve que les positions utiles chaque seconde. Les dommages recus et morts dans ces fenetres restent hors de cette premiere restitution.
 - C5. H-04 degats recus. **Moteur et API termines le 18 septembre 2026** : HP recus agreges par cellule monde, position victime directe et liens vers les rounds sources. Le rendu carte reste a faire.
 
 **Definition of done :** chaque point agregé expose son nombre d'occurrences et des liens vers les incidents sources.

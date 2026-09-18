@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from dataclasses import dataclass
 from typing import Literal
 
 import pandas as pd
@@ -70,6 +71,27 @@ class UntradedDeathCell(BaseModel):
     confidence: str = "inferred"
 
 
+class FiveVFourCell(BaseModel):
+    """Agrégat H-03 des positions fiables après un avantage exactement 5v4."""
+
+    rule_id: str = "H-03"
+    rule_version: str = "0.1"
+    cell_x: int
+    cell_y: int
+    sample_count: int
+    round_count: int
+    round_numbers: list[int]
+    confidence: str = "inferred"
+
+
+@dataclass(frozen=True)
+class _FiveVFourWindow:
+    round_number: int
+    start_tick: int
+    end_tick_exclusive: int
+    advantaged_team: int
+
+
 def _valid_enemy_kills(kills: pd.DataFrame) -> pd.DataFrame:
     required_columns = {
         "round_number",
@@ -90,6 +112,158 @@ def _valid_enemy_kills(kills: pd.DataFrame) -> pd.DataFrame:
         & (kills["killer_id"] != kills["victim_id"])
         & (kills["killer_team"] != kills["victim_team"])
     ].copy()
+
+
+def _five_v_four_windows(
+    kills: pd.DataFrame,
+    rounds: pd.DataFrame,
+    *,
+    tick_interval_seconds: float | None,
+) -> list[_FiveVFourWindow]:
+    """Construit les fenêtres strictes qui suivent le passage à 5v4.
+
+    Le modèle est volontairement limité au format compétitif 5v5. Une fenêtre
+    se ferme au prochain frag, à la fin du round ou après six secondes. Sa
+    borne de fin est exclusive : un échantillon pris sur le tick d'un nouveau
+    frag ne peut pas être attribué à l'état précédent.
+    """
+    if tick_interval_seconds is None or tick_interval_seconds <= 0:
+        return []
+    valid_kills = _valid_enemy_kills(kills).sort_values(["round_number", "tick"])
+    if valid_kills.empty:
+        return []
+
+    round_end_ticks: dict[int, int] = {}
+    if {"round_number", "end_tick"}.issubset(rounds.columns):
+        valid_rounds = rounds[rounds["round_number"].notna() & rounds["end_tick"].notna()]
+        round_end_ticks = {
+            int(round_.round_number): int(round_.end_tick)
+            for round_ in valid_rounds.itertuples(index=False)
+        }
+
+    max_window_ticks = round(6 / tick_interval_seconds)
+    windows: list[_FiveVFourWindow] = []
+    for round_number, round_kills in valid_kills.groupby("round_number", sort=False):
+        events = list(round_kills.itertuples(index=False))
+        dead_players_by_team: dict[int, set[str]] = {}
+        for index, kill in enumerate(events):
+            killer_team = int(kill.killer_team)
+            victim_team = int(kill.victim_team)
+            victim_id = str(kill.victim_id)
+            dead_players = dead_players_by_team.setdefault(victim_team, set())
+            if victim_id in dead_players:
+                continue
+            dead_players.add(victim_id)
+            alive_killer_team = 5 - len(dead_players_by_team.get(killer_team, set()))
+            alive_victim_team = 5 - len(dead_players)
+            if alive_killer_team != 5 or alive_victim_team != 4:
+                continue
+
+            start_tick = int(kill.tick)
+            later_death_ticks = [
+                int(later_kill.tick)
+                for later_kill in events[index + 1 :]
+                if int(later_kill.tick) > start_tick
+            ]
+            end_tick_candidates = [start_tick + max_window_ticks + 1]
+            if later_death_ticks:
+                end_tick_candidates.append(min(later_death_ticks))
+            round_end_tick = round_end_ticks.get(int(round_number))
+            if round_end_tick is not None:
+                end_tick_candidates.append(round_end_tick)
+            end_tick_exclusive = min(end_tick_candidates)
+            if end_tick_exclusive > start_tick:
+                windows.append(
+                    _FiveVFourWindow(
+                        round_number=int(round_number),
+                        start_tick=start_tick,
+                        end_tick_exclusive=end_tick_exclusive,
+                        advantaged_team=killer_team,
+                    )
+                )
+    return windows
+
+
+def five_v_four_sample_ticks(
+    kills: pd.DataFrame,
+    rounds: pd.DataFrame,
+    *,
+    tick_interval_seconds: float | None,
+) -> list[int]:
+    """Retourne les seuls ticks dont les positions doivent être conservées."""
+    if tick_interval_seconds is None or tick_interval_seconds <= 0:
+        return []
+    one_second_ticks = round(1 / tick_interval_seconds)
+    if one_second_ticks <= 0:
+        return []
+    sample_ticks: set[int] = set()
+    for window in _five_v_four_windows(kills, rounds, tick_interval_seconds=tick_interval_seconds):
+        for offset in range(one_second_ticks, (6 * one_second_ticks) + 1, one_second_ticks):
+            sample_tick = window.start_tick + offset
+            if sample_tick < window.end_tick_exclusive:
+                sample_ticks.add(sample_tick)
+    return sorted(sample_ticks)
+
+
+def five_v_four_cells_for_player(
+    kills: pd.DataFrame,
+    rounds: pd.DataFrame,
+    player_samples: pd.DataFrame,
+    player_id: str,
+    *,
+    tick_interval_seconds: float | None,
+    cell_size: int = 256,
+) -> list[FiveVFourCell]:
+    """Agrège les positions d'un joueur vivant dans les fenêtres H-03."""
+    if cell_size <= 0:
+        raise ValueError("cell_size must be positive")
+    if player_samples.empty and len(player_samples.columns) == 0:
+        return []
+    required_columns = {"player_id", "tick", "team_num", "is_alive", "x", "y"}
+    missing_columns = required_columns.difference(player_samples.columns)
+    if missing_columns:
+        raise ValueError("player_samples is missing columns: " + ", ".join(sorted(missing_columns)))
+    windows = _five_v_four_windows(kills, rounds, tick_interval_seconds=tick_interval_seconds)
+    if not windows:
+        return []
+
+    eligible_samples: list[tuple[_FiveVFourWindow, pd.Series]] = []
+    target_samples = player_samples[player_samples["player_id"] == player_id]
+    for window in windows:
+        sample_ticks = {
+            tick
+            for tick in five_v_four_sample_ticks(
+                kills, rounds, tick_interval_seconds=tick_interval_seconds
+            )
+            if window.start_tick < tick < window.end_tick_exclusive
+        }
+        in_window = target_samples[
+            target_samples["tick"].isin(sample_ticks)
+            & (target_samples["team_num"] == window.advantaged_team)
+            & target_samples["is_alive"].eq(True)
+            & target_samples["x"].notna()
+            & target_samples["y"].notna()
+        ]
+        eligible_samples.extend((window, sample) for _, sample in in_window.iterrows())
+
+    grouped: dict[tuple[int, int], list[tuple[_FiveVFourWindow, pd.Series]]] = {}
+    for window, sample in eligible_samples:
+        cell = (
+            math.floor(float(sample["x"]) / cell_size),
+            math.floor(float(sample["y"]) / cell_size),
+        )
+        grouped.setdefault(cell, []).append((window, sample))
+    cells = [
+        FiveVFourCell(
+            cell_x=cell_x,
+            cell_y=cell_y,
+            sample_count=len(samples_in_cell),
+            round_count=len({window.round_number for window, _ in samples_in_cell}),
+            round_numbers=sorted({window.round_number for window, _ in samples_in_cell}),
+        )
+        for (cell_x, cell_y), samples_in_cell in grouped.items()
+    ]
+    return sorted(cells, key=lambda cell: (-cell.sample_count, cell.cell_x, cell.cell_y))
 
 
 def trade_assessments_for_player(
