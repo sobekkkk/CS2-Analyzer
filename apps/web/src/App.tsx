@@ -6,11 +6,13 @@ import {
   getDamageCells,
   getOverview,
   getTimeline,
+  getUntradedDeathCells,
   inspectDemo,
   type DamageCell,
   type MatchOverview,
   type Participant,
-  type TimelineEvent
+  type TimelineEvent,
+  type UntradedDeathCell
 } from "./api/client";
 import { damageTone, displayRound } from "./features/report/rounds";
 
@@ -25,6 +27,7 @@ type ViewState =
       overview: MatchOverview;
       timeline: TimelineEvent[];
       damageCells: DamageCell[];
+      untradedDeathCells: UntradedDeathCell[];
       selectedRound: number | undefined;
     }
   | { kind: "error"; message: string };
@@ -81,6 +84,27 @@ function DamageGrid({ cells }: { cells: DamageCell[] }) {
   );
 }
 
+function UntradedDeathGrid({ cells }: { cells: UntradedDeathCell[] }) {
+  if (cells.length === 0) {
+    return <p className="empty-copy">Aucune mort sans trade observée ne remplit les conditions de cette carte.</p>;
+  }
+  return (
+    <div className="zone-grid" aria-label="Grille des morts sans trade observées">
+      {cells.map((cell) => (
+        <article
+          className="zone-cell zone-cell--trade"
+          key={`${cell.cell_x}-${cell.cell_y}`}
+          aria-label={`Cellule ${cell.cell_x}, ${cell.cell_y}, ${cell.occurrence_count} morts sans trade observées`}
+        >
+          <span className="zone-coordinates">{cell.cell_x} / {cell.cell_y}</span>
+          <strong>{cell.occurrence_count} <small>mort{cell.occurrence_count > 1 ? "s" : ""}</small></strong>
+          <span>{cell.round_count} round{cell.round_count > 1 ? "s" : ""} · tick {cell.death_ticks[0]?.toLocaleString("fr-FR")}</span>
+        </article>
+      ))}
+    </div>
+  );
+}
+
 export function App() {
   const [view, setView] = useState<ViewState>({ kind: "empty" });
   const [isRoundLoading, setIsRoundLoading] = useState(false);
@@ -92,12 +116,21 @@ export function App() {
   );
 
   async function loadReport(matchId: string, filename: string) {
-    const [overview, timeline, damageCells] = await Promise.all([
+    const [overview, timeline, damageCells, untradedDeathCells] = await Promise.all([
       getOverview(matchId),
       getTimeline(matchId),
-      getDamageCells(matchId)
+      getDamageCells(matchId),
+      getUntradedDeathCells(matchId)
     ]);
-    setView({ kind: "ready", filename, overview, timeline, damageCells, selectedRound: undefined });
+    setView({
+      kind: "ready",
+      filename,
+      overview,
+      timeline,
+      damageCells,
+      untradedDeathCells,
+      selectedRound: undefined
+    });
   }
 
   async function handleDemoSelection(file: File | undefined) {
@@ -253,6 +286,15 @@ export function App() {
                 </div>
                 <p className="panel-description">Chaque cellule agrège la position exacte de la victime au moment du dégât. Ce n’est pas encore un callout Mirage.</p>
                 <DamageGrid cells={activeReport.damageCells} />
+              </section>
+
+              <section className="panel panel--untraded">
+                <div className="panel-heading">
+                  <div><p className="eyebrow">H-01 · Confiance inférée</p><h2>Où vos morts ne sont pas suivies d’un trade</h2></div>
+                  <span className="grid-key">Grille monde</span>
+                </div>
+                <p className="panel-description">Une occurrence signifie qu’aucun coéquipier n’a éliminé le même adversaire dans les 5 secondes. Cela ne prouve ni ligne de vue ni mauvaise décision.</p>
+                <UntradedDeathGrid cells={activeReport.untradedDeathCells} />
               </section>
             </div>
           </>
