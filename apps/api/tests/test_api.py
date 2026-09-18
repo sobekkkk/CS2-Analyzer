@@ -141,6 +141,8 @@ def test_exposes_saved_match_overview_and_filtered_timeline(tmp_path, monkeypatc
                     "killer_team": 3,
                     "victim_team": 2,
                     "weapon": "awp",
+                    "victim_x": 300.0,
+                    "victim_y": -300.0,
                 }
             ]
         ),
@@ -167,6 +169,9 @@ def test_exposes_saved_match_overview_and_filtered_timeline(tmp_path, monkeypatc
     overview = client.get(f"/api/v1/matches/{'d' * 16}/overview")
     timeline = client.get(f"/api/v1/matches/{'d' * 16}/timeline?round_number=2")
     damage_cells = client.get(f"/api/v1/matches/{'d' * 16}/heatmaps/damage?cell_size=256")
+    untraded_death_cells = client.get(
+        f"/api/v1/matches/{'d' * 16}/heatmaps/untraded-deaths?cell_size=256"
+    )
 
     assert overview.status_code == 200
     assert overview.json()["selected_player"]["display_name"] == "Sobek"
@@ -180,3 +185,7 @@ def test_exposes_saved_match_overview_and_filtered_timeline(tmp_path, monkeypatc
     assert damage_cells.json()[0]["total_damage"] == 70
     assert damage_cells.json()[0]["cell_x"] == 1
     assert damage_cells.json()[0]["cell_y"] == -2
+    assert untraded_death_cells.status_code == 200
+    assert untraded_death_cells.json()[0]["occurrence_count"] == 1
+    assert untraded_death_cells.json()[0]["cell_x"] == 1
+    assert untraded_death_cells.json()[0]["cell_y"] == -2

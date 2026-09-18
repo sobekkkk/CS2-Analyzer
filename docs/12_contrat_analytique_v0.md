@@ -100,6 +100,10 @@ Avant de figer la version 1.0, nous verifierons manuellement des cas limites dan
 - L'observation de coaching ajoute seulement : round, killer, position de mort, joueurs vivants et classification. Elle ne dit pas encore "tu etais isole".
 - Une observation "exposition isolee" exige en plus un calcul de chemin/nav mesh valide ; elle reste hors v0.1.
 
+### Implementation alpha
+
+Le moteur ne produit aucun statut H-01 si la cadence de ticks est absente ou invalide. Pour la seule condition d'eligibilite de la carte, il calcule les coequipiers vivants avant la mort a partir du format competitif **5v5** et des morts deja observees dans le round ; cette disponibilite reste donc `inferred`. Une demo a effectif incomplet ou atypique doit etre revue avant toute restitution de coaching.
+
 ## H-02 - Position de premier kill
 
 ### Definition
