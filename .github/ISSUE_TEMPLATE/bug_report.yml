@@ -1,0 +1,34 @@
+name: Rapport de bug
+description: Signaler un comportement incorrect ou une regression.
+title: "[Bug] "
+labels: ["bug", "triage"]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexte
+      description: Version, map, type de demo et joueur selectionne (jamais de donnees personnelles inutiles).
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Resultat attendu
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Resultat observe
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Etapes de reproduction
+      placeholder: |
+        1. Importer …
+        2. Selectionner …
+        3. Observer …
+    validations:
+      required: true

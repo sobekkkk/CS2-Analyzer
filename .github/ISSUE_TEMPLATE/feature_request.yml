@@ -1,0 +1,23 @@
+name: Proposition de fonctionnalite
+description: Proposer une amelioration centree sur la progression du joueur.
+title: "[Feature] "
+labels: ["feature", "triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Probleme joueur a resoudre
+      description: Quel progres concret cette fonctionnalite rend-elle possible ?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposition
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Indicateur ou preuve attendue
+      description: Quelle donnee de demo et quel critere permettraient de juger le resultat ?

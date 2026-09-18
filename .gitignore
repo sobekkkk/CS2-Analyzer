@@ -1,0 +1,12 @@
+# Outils de validation locaux et donnees de demonstration : jamais versionnes.
+.tools/
+data/
+*.dem
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+node_modules/
+dist/
+.env

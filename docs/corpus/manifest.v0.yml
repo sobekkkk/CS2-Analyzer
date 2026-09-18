@@ -1,0 +1,89 @@
+# Corpus de reference - v0
+# Les chemins locaux ne sont pas distribues avec le projet. Les empreintes
+# garantissent que le meme fichier est utilise lors des validations futures.
+version: 0
+purpose: "Validation technique du parser, timeline et heatmaps de_mirage"
+status: "lot_initial_complet - 5 fichiers verifies"
+selection_bias:
+  - "Toutes les demos sont des matchs professionnels impliquant Vitality."
+  - "Toutes sont sur de_mirage."
+  - "Ce lot valide une premiere carte, pas la generalisation a tous niveaux ou patches."
+intended_use:
+  - "Regression du parser et compatibilite de builds."
+  - "Ordres de grandeur techniques seulement."
+not_intended_use:
+  - "Definir les seuils finaux de coaching."
+  - "Representer les joueurs cibles du produit."
+files:
+  - id: mouz-vs-vitality-m2-mirage
+    path: "C:/Users/drago/Downloads/mouz-vs-vitality-m2-mirage.dem"
+    status: verified
+    map_expected: de_mirage
+    cs2_patch_version: "14174"
+    size_bytes: 312033245
+    sha256: "1B8097794845B8994846D52D47DB86FAEC78C838B345D3013C57E883AD230126"
+    format_magic: "PBDEMS2\\0"
+    parsed_summary:
+      players: 10
+      player_deaths: 143
+      player_hurts: 527
+      bomb_plants: 11
+      grenades_thrown: 368
+  - id: vitality-vs-spirit-m3-mirage
+    path: "C:/Users/drago/Downloads/vitality-vs-spirit-m3-mirage.dem"
+    status: verified
+    map_expected: de_mirage
+    cs2_patch_version: "14174"
+    size_bytes: 281565803
+    sha256: "9026EDCDD8B8026A01DE5B81727C83766E397B74B57FF764AC96A6C9DBEDE7EC"
+    format_magic: "PBDEMS2\\0"
+    parsed_summary:
+      players: 10
+      player_deaths: 101
+      player_hurts: 415
+      bomb_plants: 8
+      grenades_thrown: 339
+  - id: vitality-vs-legacy-m2-mirage
+    path: "C:/Users/drago/Downloads/vitality-vs-legacy-m2-mirage.dem"
+    status: verified
+    map_expected: de_mirage
+    cs2_patch_version: "14174"
+    size_bytes: 358626410
+    sha256: "70D7AB0078F6833FF149DE026E48199CF94B179487ABE9A2B70965BF4DB3EEC8"
+    format_magic: "PBDEMS2\\0"
+    parsed_summary:
+      players: 10
+      player_deaths: 161
+      player_hurts: 582
+      bomb_plants: 9
+      grenades_thrown: 444
+  - id: b8-vs-vitality-m1-mirage
+    path: "C:/Users/drago/Downloads/b8-vs-vitality-m1-mirage.dem"
+    status: verified
+    map_expected: de_mirage
+    cs2_patch_version: "14174"
+    size_bytes: 470597289
+    sha256: "930CD15E8112CB468E1AE2E1D2E73C325839146A8018FE3E88BA64D6DE01BECA"
+    format_magic: "PBDEMS2\\0"
+    parsed_summary:
+      players: 10
+      player_deaths: 193
+      player_hurts: 746
+      bomb_plants: 16
+      grenades_thrown: 612
+  - id: vitality-vs-mouz-m1-mirage
+    path: "C:/Users/drago/Downloads/vitality-vs-mouz-m1-mirage.dem"
+    status: verified
+    map_expected: de_mirage
+    cs2_patch_version: "14165"
+    size_bytes: 469136106
+    sha256: "B125077BB02E251FCC31A8FEFA459BDBF4C5A674EF560FAC6E9EA4DF4BE3E1F4"
+    format_magic: "PBDEMS2\\0"
+    parsed_summary:
+      players: 10
+      player_deaths: 147
+      player_hurts: 565
+      bomb_plants: 13
+      grenades_thrown: 448
+next_needed:
+  - "Ajouter ensuite des demos personnelles et au moins une demo d'un autre patch/source."

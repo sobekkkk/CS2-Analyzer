@@ -1,0 +1,182 @@
+from __future__ import annotations
+
+import pandas as pd
+from fastapi.testclient import TestClient
+
+from cs2_analyzer import main
+from cs2_analyzer.models import DemoInspection, Participant
+from cs2_analyzer.normalization import CanonicalMatch
+from cs2_analyzer.profile import LocalProfileStore
+from cs2_analyzer.staging import PendingAnalysisStore
+from cs2_analyzer.storage import LocalMatchStore
+
+
+def test_health() -> None:
+    response = TestClient(main.app).get("/api/v1/health")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+
+def test_rejects_non_demo_upload() -> None:
+    response = TestClient(main.app).post(
+        "/api/v1/demos", files={"file": ("notes.txt", b"not a demo", "text/plain")}
+    )
+
+    assert response.status_code == 400
+    assert response.json()["detail"]["code"] == "unsupported_file"
+
+
+def test_rejects_malformed_analysis_identifier() -> None:
+    response = TestClient(main.app).post(
+        "/api/v1/analyses/not-an-analysis-id/player", json={"participant_id": "player-a"}
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"]["code"] == "analysis_not_found"
+
+
+def test_import_select_and_delete_temporary_demo(tmp_path, monkeypatch) -> None:
+    inspection = DemoInspection(
+        source_sha256="c" * 64,
+        source_filename="sample.dem",
+        size_bytes=16,
+        map_name="de_mirage",
+        parser_version="0.42.0",
+        tick_interval_seconds=0.015625,
+        competitive_start_tick=0,
+        participants=[Participant(id="player-a", display_name="Sobek")],
+        rounds_observed=1,
+        player_deaths_after_start=1,
+        player_hurts_after_start=1,
+    )
+
+    class FakeInspector:
+        def inspect(self, path):
+            return inspection
+
+    class FakeNormalizer:
+        def normalize(self, path):
+            return CanonicalMatch(
+                inspection=inspection,
+                rounds=pd.DataFrame(
+                    [
+                        {
+                            "round_number": 0,
+                            "end_tick": 100,
+                            "winner_side": "T",
+                            "end_reason": "t_killed",
+                        }
+                    ]
+                ),
+                kills=pd.DataFrame(),
+                damages=pd.DataFrame(),
+            )
+
+    monkeypatch.setattr(main, "inspector", FakeInspector())
+    monkeypatch.setattr(main, "normalizer", FakeNormalizer())
+    monkeypatch.setattr(main, "pending_store", PendingAnalysisStore(tmp_path))
+    monkeypatch.setattr(main, "profile_store", LocalProfileStore(tmp_path))
+    monkeypatch.setattr(main, "match_store", LocalMatchStore(tmp_path))
+    client = TestClient(main.app)
+
+    created = client.post(
+        "/api/v1/demos",
+        files={"file": ("sample.dem", b"PBDEMS2\x00demo", "application/octet-stream")},
+    )
+    assert created.status_code == 200
+    analysis_id = created.json()["id"]
+
+    selected = client.post(
+        f"/api/v1/analyses/{analysis_id}/player", json={"participant_id": "player-a"}
+    )
+    assert selected.status_code == 200
+    assert selected.json()["status"] == "ready"
+    assert not main.pending_store.demo_path(analysis_id).exists()
+    assert (tmp_path / "matches" / ("c" * 16) / "metadata.json").is_file()
+
+
+def test_exposes_saved_match_overview_and_filtered_timeline(tmp_path, monkeypatch) -> None:
+    inspection = DemoInspection(
+        source_sha256="d" * 64,
+        source_filename="sample.dem",
+        size_bytes=16,
+        map_name="de_mirage",
+        parser_version="0.42.0",
+        tick_interval_seconds=0.015625,
+        competitive_start_tick=0,
+        participants=[
+            Participant(id="target", display_name="Sobek"),
+            Participant(id="enemy", display_name="Enemy"),
+        ],
+        rounds_observed=2,
+        player_deaths_after_start=1,
+        player_hurts_after_start=1,
+    )
+    match = CanonicalMatch(
+        inspection=inspection,
+        rounds=pd.DataFrame(
+            [
+                {
+                    "round_number": 1,
+                    "end_tick": 100,
+                    "winner_side": "T",
+                    "end_reason": "t_killed",
+                },
+                {
+                    "round_number": 2,
+                    "end_tick": 200,
+                    "winner_side": "CT",
+                    "end_reason": "ct_killed",
+                },
+            ]
+        ),
+        kills=pd.DataFrame(
+            [
+                {
+                    "round_number": 2,
+                    "tick": 180,
+                    "killer_id": "enemy",
+                    "victim_id": "target",
+                    "killer_team": 3,
+                    "victim_team": 2,
+                    "weapon": "awp",
+                }
+            ]
+        ),
+        damages=pd.DataFrame(
+            [
+                {
+                    "round_number": 2,
+                    "tick": 150,
+                    "attacker_id": "enemy",
+                    "victim_id": "target",
+                    "damage_health": 70,
+                    "weapon": "awp",
+                    "victim_x": 300.0,
+                    "victim_y": -300.0,
+                }
+            ]
+        ),
+    )
+    store = LocalMatchStore(tmp_path)
+    store.save(match, "target")
+    monkeypatch.setattr(main, "match_store", store)
+    client = TestClient(main.app)
+
+    overview = client.get(f"/api/v1/matches/{'d' * 16}/overview")
+    timeline = client.get(f"/api/v1/matches/{'d' * 16}/timeline?round_number=2")
+    damage_cells = client.get(f"/api/v1/matches/{'d' * 16}/heatmaps/damage?cell_size=256")
+
+    assert overview.status_code == 200
+    assert overview.json()["selected_player"]["display_name"] == "Sobek"
+    assert overview.json()["player_deaths"] == 1
+    assert timeline.status_code == 200
+    assert [(event["kind"], event["tick"]) for event in timeline.json()] == [
+        ("damage", 150),
+        ("kill", 180),
+    ]
+    assert damage_cells.status_code == 200
+    assert damage_cells.json()[0]["total_damage"] == 70
+    assert damage_cells.json()[0]["cell_x"] == 1
+    assert damage_cells.json()[0]["cell_y"] == -2

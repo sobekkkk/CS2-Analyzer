@@ -1,0 +1,174 @@
+# Corpus joueurs Mirage - calibration v0
+# Les chemins et empreintes sont locaux. Aucun pseudo ou SteamID non fourni par
+# l'utilisateur n'est enregistre dans ce manifeste.
+version: 0
+purpose: "Calibration initiale des delais de trade et validation des signaux H-01 a H-04"
+status: "verifie - 12 demos recentes"
+selection_bias:
+  - "Une seule carte : de_mirage."
+  - "Les niveaux proviennent des indications du porteur de projet."
+  - "Le corpus n'est pas encore un echantillon aleatoire de joueurs."
+intended_use:
+  - "Calibration prudente et revue manuelle des faux positifs."
+  - "Validation du parser sur des matchs joueurs recents."
+not_intended_use:
+  - "Classement des joueurs par niveau."
+  - "Inference du niveau depuis une demo."
+files:
+  - id: premier-sobek-game1
+    path: "C:/Program Files (x86)/Steam/steamapps/common/Counter-Strike Global Offensive/game/csgo/replays/game1-mirage-sobek.dem"
+    source: "Premier"
+    level_segment: "Premier 15-20k"
+    participant_pseudonym: "Sobek"
+    recency: "moins de 7 jours a la date de remise"
+    map_expected: de_mirage
+    rounds_observed: 23
+    players_observed: 10
+    player_deaths: 158
+    player_hurts: 636
+    sha256: "2FD98A26590FB0C2546D8FF95384348A895CD60331743CC7024397B99EE7E27C"
+  - id: premier-sobek-game2
+    path: "C:/Program Files (x86)/Steam/steamapps/common/Counter-Strike Global Offensive/game/csgo/replays/game2-mirage-sobek.dem"
+    source: "Premier"
+    level_segment: "Premier 15-20k"
+    participant_pseudonym: "Sobek"
+    recency: "moins de 7 jours a la date de remise"
+    map_expected: de_mirage
+    rounds_observed: 20
+    players_observed: 10
+    player_deaths: 137
+    player_hurts: 547
+    sha256: "00298F440C51345E3E9984873D00A69FB999861A75923BB09294A4D1C71B7C70"
+  - id: premier-sobek-game3
+    path: "C:/Program Files (x86)/Steam/steamapps/common/Counter-Strike Global Offensive/game/csgo/replays/game3-mirage-sobek.dem"
+    source: "Premier"
+    level_segment: "Premier 15-20k"
+    participant_pseudonym: "Sobek"
+    recency: "moins de 7 jours a la date de remise"
+    map_expected: de_mirage
+    rounds_observed: 12
+    players_observed: 10
+    player_deaths: 73
+    player_hurts: 225
+    sha256: "C6186B5C4FB9A33D788E51CEA11D2FF27C671F4255B822FC2FBE376D7F67588F"
+  - id: faceit-10-2000elo-2
+    path: "C:/Users/drago/Downloads/faceit-10-2000elo-2.dem"
+    source: "FACEIT"
+    level_segment: "FACEIT 10"
+    participant_pseudonym: "unknown"
+    recency: "moins de 7 jours a la date de remise"
+    map_expected: de_mirage
+    rounds_observed: 28
+    players_observed: 10
+    player_deaths: 225
+    player_hurts: 782
+    sha256: "D63A00ECBBC9BAE067C93A47ED1C99E4F131772D85251C2E798A8DD525F82380"
+  - id: faceit-10-2000elo
+    path: "C:/Users/drago/Downloads/faceit-10-2000elo.dem"
+    source: "FACEIT"
+    level_segment: "FACEIT 10"
+    participant_pseudonym: "unknown"
+    recency: "moins de 7 jours a la date de remise"
+    map_expected: de_mirage
+    rounds_observed: 22
+    players_observed: 10
+    player_deaths: 180
+    player_hurts: 619
+    sha256: "026C58C6F323DB296B03D74088313D1BACE0384A8BA899725922B7C7A19F6ECD"
+  - id: faceit-10-2200elo
+    path: "C:/Users/drago/Downloads/faceit-10-2200elo.dem"
+    source: "FACEIT"
+    level_segment: "FACEIT 10"
+    participant_pseudonym: "unknown"
+    recency: "moins de 7 jours a la date de remise"
+    map_expected: de_mirage
+    rounds_observed: 17
+    players_observed: 10
+    player_deaths: 130
+    player_hurts: 436
+    sha256: "E6320AAD5E4F7F09510FC810B6925B0B45D3347DAAAA3DD7803A3DFA9CBEE04E"
+  - id: faceit-7-1300elo1
+    path: "C:/Users/drago/Downloads/faceit-7-1300elo1.dem"
+    source: "FACEIT"
+    level_segment: "FACEIT 7"
+    participant_pseudonym: "unknown"
+    recency: "moins de 7 jours a la date de remise"
+    map_expected: de_mirage
+    rounds_observed: 18
+    players_observed: 10
+    player_deaths: 146
+    player_hurts: 602
+    sha256: "E3175761E9EDE5E0808C430103D74423A59352DC3D6666D941C1343001C6C832"
+  - id: faceit-7-1300elo2
+    path: "C:/Users/drago/Downloads/faceit-7-1300elo2.dem"
+    source: "FACEIT"
+    level_segment: "FACEIT 7"
+    participant_pseudonym: "unknown"
+    recency: "moins de 7 jours a la date de remise"
+    map_expected: de_mirage
+    rounds_observed: 18
+    players_observed: 10
+    player_deaths: 137
+    player_hurts: 540
+    sha256: "D248F5092E8718710C2CE626540107E733550B83195DC89777A0C367D52607EF"
+  - id: faceit-3-1
+    path: "C:/Users/drago/Downloads/faceit-3-1.dem"
+    source: "FACEIT"
+    level_segment: "FACEIT 3"
+    participant_pseudonym: "unknown"
+    recency: "moins de 7 jours a la date de remise"
+    map_expected: de_mirage
+    rounds_observed: 16
+    players_observed: 11
+    player_deaths: 122
+    player_hurts: 500
+    sha256: "1507BA9FF46468F57A50BBFB23AB184CA7D78D35DABAF83C07B960D55D8E692C"
+  - id: faceit-3-2
+    path: "C:/Users/drago/Downloads/faceit-3-2.dem"
+    source: "FACEIT"
+    level_segment: "FACEIT 3"
+    participant_pseudonym: "unknown"
+    recency: "moins de 7 jours a la date de remise"
+    map_expected: de_mirage
+    rounds_observed: 20
+    players_observed: 10
+    player_deaths: 158
+    player_hurts: 607
+    sha256: "D96F14016C630B58F59E6BA3EACFEA607943BEE8A1B37028ED00B571DD7C1BE0"
+  - id: faceit-3-3
+    path: "C:/Users/drago/Downloads/faceit-3-3.dem"
+    source: "FACEIT"
+    level_segment: "FACEIT 3"
+    participant_pseudonym: "unknown"
+    recency: "moins de 7 jours a la date de remise"
+    map_expected: de_mirage
+    rounds_observed: 23
+    players_observed: 11
+    player_deaths: 171
+    player_hurts: 688
+    sha256: "A18C94C0BD3AD017A361FFD15D4139AB51EEB8C1B4C509905A563E180941BC6A"
+  - id: faceit-3-4
+    path: "C:/Users/drago/Downloads/faceit-3-4.dem"
+    source: "FACEIT"
+    level_segment: "FACEIT 3"
+    participant_pseudonym: "unknown"
+    recency: "moins de 7 jours a la date de remise"
+    map_expected: de_mirage
+    rounds_observed: 19
+    players_observed: 10
+    player_deaths: 158
+    player_hurts: 611
+    sha256: "5768560D5C362564020A4DC9F827DE5CFA371E6E61090820F23158945E255934"
+validation_summary:
+  unique_participants_observed_anonymously: 104
+  pre_match_knife_deaths_excluded: 62
+  trade_calibration_after_exclusion:
+    eligible_deaths: 1710
+    trades_within_5_seconds: 294
+  segments:
+    "FACEIT 3": 4
+    "FACEIT 7": 2
+    "Premier 15-20k": 3
+    "FACEIT 10": 3
+next_needed:
+  - "Revoir manuellement des exemples limites dans le replay avant de figer les libelles de coaching."

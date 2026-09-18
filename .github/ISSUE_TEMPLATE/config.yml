@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question produit
+    url: ../../discussions
+    about: Utiliser une discussion pour les idees encore a cadrer.
