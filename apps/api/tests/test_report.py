@@ -66,6 +66,15 @@ def _match() -> CanonicalMatch:
                     "victim_team": 2,
                     "weapon": "hegrenade",
                 },
+                {
+                    "round_number": 2,
+                    "tick": 260,
+                    "killer_id": float("nan"),
+                    "victim_id": "target",
+                    "killer_team": float("nan"),
+                    "victim_team": 2,
+                    "weapon": "trigger_hurt",
+                },
             ]
         ),
         damages=pd.DataFrame(
@@ -108,6 +117,8 @@ def test_timeline_merges_damage_and_kills_in_tick_order_with_round_filter() -> N
         ("damage", 200),
         ("kill", 220),
         ("kill", 240),
+        ("kill", 260),
     ]
     assert timeline[0].damage_health == 70
     assert timeline[1].weapon == "awp"
+    assert timeline[3].actor_id is None

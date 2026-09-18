@@ -6,6 +6,11 @@ from .models import MatchOverview, TimelineEvent
 from .normalization import CanonicalMatch
 
 
+def _optional_text(value: object) -> str | None:
+    """Convertit les valeurs manquantes Pandas en null pour le contrat API."""
+    return None if value is None or pd.isna(value) else str(value)
+
+
 def _enemy_kills(kills: pd.DataFrame) -> pd.DataFrame:
     if kills.empty:
         return kills
@@ -70,8 +75,8 @@ def timeline_for_match(
                 kind="damage",
                 round_number=int(damage.round_number),
                 tick=int(damage.tick),
-                actor_id=damage.attacker_id,
-                victim_id=damage.victim_id,
+                actor_id=_optional_text(damage.attacker_id),
+                victim_id=_optional_text(damage.victim_id),
                 weapon=str(damage.weapon),
                 damage_health=int(damage.damage_health),
             )
@@ -82,8 +87,8 @@ def timeline_for_match(
                 kind="kill",
                 round_number=int(kill.round_number),
                 tick=int(kill.tick),
-                actor_id=kill.killer_id,
-                victim_id=kill.victim_id,
+                actor_id=_optional_text(kill.killer_id),
+                victim_id=_optional_text(kill.victim_id),
                 weapon=str(kill.weapon),
             )
         )

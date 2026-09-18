@@ -9,4 +9,6 @@ __pycache__/
 htmlcov/
 node_modules/
 dist/
+.venv/
+*.egg-info/
 .env
