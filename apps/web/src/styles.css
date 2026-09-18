@@ -71,6 +71,18 @@ button { cursor: pointer; }
 .zone-cell small { font-size: 11px; letter-spacing: .04em; }
 .zone-coordinates { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 .empty-copy { color: #99a5aa; line-height: 1.55; }
+.world-grid { background-color: #12191c; background-image: linear-gradient(#29363b 1px, transparent 1px), linear-gradient(90deg, #29363b 1px, transparent 1px); background-size: 26px 26px; border: 1px solid #3a4b51; border-radius: 5px; height: 320px; margin-top: 22px; overflow: hidden; position: relative; }
+.world-grid__axis { color: #91a0a6; font-size: 10px; font-weight: 800; left: 50%; letter-spacing: .1em; position: absolute; transform: translateX(-50%); }
+.world-grid__axis--north { top: 9px; }
+.world-grid__axis--south { bottom: 9px; }
+.world-cell { border: 1px solid #46727b; border-radius: 4px; box-shadow: 0 0 0 2px #12191c; color: #eaf4f5; min-width: 50px; padding: 5px 6px; position: absolute; text-align: center; transform: translate(-50%, -50%); }
+.world-cell--intensity-0 { background: #263a3e; }
+.world-cell--intensity-1 { background: #28505a; }
+.world-cell--intensity-2 { background: #2f6774; }
+.world-cell--intensity-3 { background: #388495; border-color: #68b5c5; }
+.world-cell strong, .world-cell span, .world-cell small { display: block; }
+.world-cell strong { font-size: 15px; font-variant-numeric: tabular-nums; }
+.world-cell span, .world-cell small { color: #d2e0e2; font-size: 9px; line-height: 1.35; }
 .panel--untraded { grid-column: span 2; }
 .panel--opening-kills { grid-column: span 2; }
 .panel--five-v-four { grid-column: span 2; }

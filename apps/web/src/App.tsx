@@ -19,6 +19,7 @@ import {
   type UntradedDeathCell
 } from "./api/client";
 import { damageTone, displayRound } from "./features/report/rounds";
+import { createWorldViewport, worldGridPoint } from "./features/report/world-grid";
 
 type ViewState =
   | { kind: "empty" }
@@ -115,19 +116,29 @@ function FiveVFourGrid({ cells }: { cells: FiveVFourCell[] }) {
   if (cells.length === 0) {
     return <p className="empty-copy">Aucune position fiable après un avantage 5v4 dans cette démo.</p>;
   }
+  const viewport = createWorldViewport(cells);
+  const maximumSamples = Math.max(...cells.map((cell) => cell.sample_count));
+  if (!viewport) return null;
   return (
-    <div className="zone-grid" aria-label="Grille des positions après un avantage 5v4">
-      {cells.map((cell) => (
-        <article
-          className="zone-cell zone-cell--advantage"
-          key={`${cell.cell_x}-${cell.cell_y}`}
-          aria-label={`Cellule ${cell.cell_x}, ${cell.cell_y}, ${cell.sample_count} positions observées après un 5v4`}
-        >
-          <span className="zone-coordinates">{cell.cell_x} / {cell.cell_y}</span>
-          <strong>{cell.sample_count} <small>position{cell.sample_count > 1 ? "s" : ""}</small></strong>
-          <span>{cell.round_count} round{cell.round_count > 1 ? "s" : ""} · après 5v4</span>
-        </article>
-      ))}
+    <div className="world-grid" aria-label="Carte de grille monde : positions après un avantage 5v4" role="group">
+      <span className="world-grid__axis world-grid__axis--north" aria-hidden="true">N</span>
+      <span className="world-grid__axis world-grid__axis--south" aria-hidden="true">S</span>
+      {cells.map((cell) => {
+        const point = worldGridPoint(cell, viewport);
+        const intensity = damageTone(cell.sample_count, maximumSamples);
+        return (
+          <article
+            className={`world-cell world-cell--intensity-${intensity}`}
+            key={`${cell.cell_x}-${cell.cell_y}`}
+            aria-label={`Cellule ${cell.cell_x}, ${cell.cell_y}, ${cell.sample_count} positions observées après un 5v4`}
+            style={{ left: `${point.left}%`, top: `${point.top}%` }}
+          >
+            <strong>{cell.sample_count}</strong>
+            <span>{cell.cell_x} / {cell.cell_y}</span>
+            <small>{cell.round_count} round{cell.round_count > 1 ? "s" : ""}</small>
+          </article>
+        );
+      })}
     </div>
   );
 }

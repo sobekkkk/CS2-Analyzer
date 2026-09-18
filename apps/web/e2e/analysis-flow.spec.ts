@@ -60,6 +60,7 @@ test("a local import reaches the player report without a real demo upload", asyn
   await expect(page.getByRole("heading", { name: "Vos premiers kills" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Où vous êtes après un avantage 5v4" })).toBeVisible();
   await expect(page.getByLabel(/Cellule 1, -2, 3 positions observées après un 5v4/i)).toBeVisible();
+  await expect(page.getByLabel("Carte de grille monde : positions après un avantage 5v4")).toBeVisible();
   const openingKill = page.getByRole("button", { name: "Voir la timeline du round 1" });
   await expect(openingKill).toBeVisible();
   await openingKill.click();

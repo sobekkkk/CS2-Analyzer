@@ -80,7 +80,7 @@ Pendant le prototype local, les assets sont stockes hors Git sous `data/maps/de_
 
 | Niveau produit | Representation autorisee | Condition |
 | --- | --- | --- |
-| Alpha local | Grille monde normalisee, libellee "zone de grille" | Disponible maintenant ; aucune image Mirage redistribuee |
+| Alpha local | Grille monde normalisee, libellee "zone de grille" | Disponible : projection 2D de cellules avec axe N/S ; aucune image Mirage redistribuee |
 | Beta privee | Radar Mirage + callouts `nav_place` | 12 points connus et source/version/hash verifies |
 | Distribution publique | Meme beta, plus audit des droits de redistribution | Aucune dependance a un fichier Valve copie dans le depot |
 
