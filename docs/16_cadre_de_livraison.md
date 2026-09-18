@@ -65,12 +65,12 @@ La couverture est suivie comme signal secondaire. Aucun seuil global ne remplace
 - `main` est protegee : aucun push direct, PR obligatoire, CI verte avant fusion.
 - Branches courtes : `codex/<sujet>` ou `feature/<sujet>` ; une branche ne vit pas plusieurs semaines.
 - Toute PR indique objectif, test, impact securite, migration/rollback et captures si interface.
-- Au moins une approbation avant merge ; deux pour parsing, stockage, secrets ou politique securite quand une equipe existe.
+- En phase solo : PR et CI verte obligatoires, mais aucune approbation ne peut etre imposee sans se bloquer soi-meme. Des le premier contributeur supplementaire : une approbation est obligatoire ; deux pour parsing, stockage, secrets ou politique securite.
 - Les fonctionnalites inachevees sont cachees derriere un feature flag local ; aucun demi-parcours n'est expose par defaut.
 
 Apres le premier push, la configuration GitHub a appliquer sur `main` est :
 
-- pull request obligatoire, avec au moins une approbation ;
+- pull request obligatoire ; activer une approbation obligatoire des l'arrivee d'un second contributeur ;
 - controle CI `quality` obligatoire et branche a jour avant fusion ;
 - pas de force-push, pas de suppression de branche par erreur ;
 - revues CODEOWNERS obligatoires des qu'il y a plus d'un contributeur.
