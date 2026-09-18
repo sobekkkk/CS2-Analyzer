@@ -20,8 +20,10 @@ from .profile import LocalProfileStore
 from .report import build_match_overview, timeline_for_match
 from .rules import (
     DamageCell,
+    OpeningKill,
     UntradedDeathCell,
     damage_cells_for_player,
+    opening_kills_for_player,
     untraded_death_cells_for_player,
 )
 from .staging import PendingAnalysisStore
@@ -87,6 +89,17 @@ def damage_heatmap(
         stored.selected_player_id,
         cell_size=cell_size,
     )
+
+
+@app.get(
+    "/api/v1/matches/{match_id}/highlights/opening-kills",
+    response_model=list[OpeningKill],
+    responses={404: {"model": ErrorResponse}},
+)
+def opening_kill_highlights(match_id: str) -> list[OpeningKill]:
+    """Expose les premiers kills du joueur, preuves H-02 par round."""
+    stored = _stored_match_or_404(match_id)
+    return opening_kills_for_player(stored.match.kills, stored.selected_player_id)
 
 
 @app.get(

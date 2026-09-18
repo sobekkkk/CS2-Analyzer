@@ -4,12 +4,14 @@ import { Button } from "react-aria-components";
 import {
   choosePlayer,
   getDamageCells,
+  getOpeningKills,
   getOverview,
   getTimeline,
   getUntradedDeathCells,
   inspectDemo,
   type DamageCell,
   type MatchOverview,
+  type OpeningKill,
   type Participant,
   type TimelineEvent,
   type UntradedDeathCell
@@ -28,6 +30,7 @@ type ViewState =
       timeline: TimelineEvent[];
       damageCells: DamageCell[];
       untradedDeathCells: UntradedDeathCell[];
+      openingKills: OpeningKill[];
       selectedRound: number | undefined;
     }
   | { kind: "error"; message: string };
@@ -105,6 +108,35 @@ function UntradedDeathGrid({ cells }: { cells: UntradedDeathCell[] }) {
   );
 }
 
+function OpeningKillList({
+  kills,
+  onOpenRound
+}: {
+  kills: OpeningKill[];
+  onOpenRound: (roundNumber: number) => void;
+}) {
+  if (kills.length === 0) {
+    return <p className="empty-copy">Aucun premier kill ennemi observé pour ce joueur.</p>;
+  }
+  return (
+    <ol className="opening-kill-list" aria-label="Premiers kills observés">
+      {kills.map((kill) => (
+        <li key={`${kill.round_number}-${kill.tick}`}>
+          <Button
+            aria-label={`Voir la timeline du round ${kill.round_number + 1}`}
+            className="opening-kill"
+            onPress={() => onOpenRound(kill.round_number)}
+          >
+            <span>Round {kill.round_number + 1}</span>
+            <strong>{kill.weapon.toUpperCase()}</strong>
+            <small>Tick {kill.tick.toLocaleString("fr-FR")}</small>
+          </Button>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 export function App() {
   const [view, setView] = useState<ViewState>({ kind: "empty" });
   const [isRoundLoading, setIsRoundLoading] = useState(false);
@@ -116,11 +148,12 @@ export function App() {
   );
 
   async function loadReport(matchId: string, filename: string) {
-    const [overview, timeline, damageCells, untradedDeathCells] = await Promise.all([
+    const [overview, timeline, damageCells, untradedDeathCells, openingKills] = await Promise.all([
       getOverview(matchId),
       getTimeline(matchId),
       getDamageCells(matchId),
-      getUntradedDeathCells(matchId)
+      getUntradedDeathCells(matchId),
+      getOpeningKills(matchId)
     ]);
     setView({
       kind: "ready",
@@ -129,6 +162,7 @@ export function App() {
       timeline,
       damageCells,
       untradedDeathCells,
+      openingKills,
       selectedRound: undefined
     });
   }
@@ -295,6 +329,15 @@ export function App() {
                 </div>
                 <p className="panel-description">Une occurrence signifie qu’aucun coéquipier n’a éliminé le même adversaire dans les 5 secondes. Cela ne prouve ni ligne de vue ni mauvaise décision.</p>
                 <UntradedDeathGrid cells={activeReport.untradedDeathCells} />
+              </section>
+
+              <section className="panel panel--opening-kills">
+                <div className="panel-heading">
+                  <div><p className="eyebrow">H-02 · Confiance directe</p><h2>Vos premiers kills</h2></div>
+                  <span className="grid-key">Contexte round</span>
+                </div>
+                <p className="panel-description">Chaque élément est le premier kill ennemi du round. Ouvrez le round pour relire la séquence.</p>
+                <OpeningKillList kills={activeReport.openingKills} onOpenRound={(roundNumber) => void selectRound(roundNumber)} />
               </section>
             </div>
           </>

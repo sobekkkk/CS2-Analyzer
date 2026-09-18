@@ -134,6 +134,17 @@ def test_exposes_saved_match_overview_and_filtered_timeline(tmp_path, monkeypatc
         kills=pd.DataFrame(
             [
                 {
+                    "round_number": 1,
+                    "tick": 80,
+                    "killer_id": "target",
+                    "victim_id": "enemy",
+                    "killer_team": 2,
+                    "victim_team": 3,
+                    "weapon": "ak47",
+                    "victim_x": 100.0,
+                    "victim_y": -100.0,
+                },
+                {
                     "round_number": 2,
                     "tick": 180,
                     "killer_id": "enemy",
@@ -143,7 +154,7 @@ def test_exposes_saved_match_overview_and_filtered_timeline(tmp_path, monkeypatc
                     "weapon": "awp",
                     "victim_x": 300.0,
                     "victim_y": -300.0,
-                }
+                },
             ]
         ),
         damages=pd.DataFrame(
@@ -169,6 +180,7 @@ def test_exposes_saved_match_overview_and_filtered_timeline(tmp_path, monkeypatc
     overview = client.get(f"/api/v1/matches/{'d' * 16}/overview")
     timeline = client.get(f"/api/v1/matches/{'d' * 16}/timeline?round_number=2")
     damage_cells = client.get(f"/api/v1/matches/{'d' * 16}/heatmaps/damage?cell_size=256")
+    opening_kills = client.get(f"/api/v1/matches/{'d' * 16}/highlights/opening-kills")
     untraded_death_cells = client.get(
         f"/api/v1/matches/{'d' * 16}/heatmaps/untraded-deaths?cell_size=256"
     )
@@ -185,6 +197,18 @@ def test_exposes_saved_match_overview_and_filtered_timeline(tmp_path, monkeypatc
     assert damage_cells.json()[0]["total_damage"] == 70
     assert damage_cells.json()[0]["cell_x"] == 1
     assert damage_cells.json()[0]["cell_y"] == -2
+    assert opening_kills.status_code == 200
+    assert opening_kills.json() == [
+        {
+            "rule_id": "H-02",
+            "rule_version": "0.1",
+            "round_number": 1,
+            "tick": 80,
+            "weapon": "ak47",
+            "killer_team": 2,
+            "confidence": "direct",
+        }
+    ]
     assert untraded_death_cells.status_code == 200
     assert untraded_death_cells.json()[0]["occurrence_count"] == 1
     assert untraded_death_cells.json()[0]["cell_x"] == 1

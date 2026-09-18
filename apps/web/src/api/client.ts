@@ -43,6 +43,14 @@ export type UntradedDeathCell = {
   death_ticks: number[];
 };
 
+export type OpeningKill = {
+  round_number: number;
+  tick: number;
+  weapon: string;
+  killer_team: number;
+  confidence: "direct";
+};
+
 export class ApiError extends Error {
   constructor(message: string) {
     super(message);
@@ -90,4 +98,8 @@ export function getDamageCells(matchId: string): Promise<DamageCell[]> {
 
 export function getUntradedDeathCells(matchId: string): Promise<UntradedDeathCell[]> {
   return request(`/matches/${matchId}/heatmaps/untraded-deaths`);
+}
+
+export function getOpeningKills(matchId: string): Promise<OpeningKill[]> {
+  return request(`/matches/${matchId}/highlights/opening-kills`);
 }
