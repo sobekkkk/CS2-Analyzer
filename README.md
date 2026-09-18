@@ -9,7 +9,7 @@ Ce dossier fige les decisions de produit avant de commencer le code. Il est ecri
 - **Lot C3 - moteur H-02 : termine.** Les opening kills sont calcules avec preuve directe ; validation reelle sur la demo `xSobek` (3 occurrences).
 - **Lot C5 - moteur H-04 : termine.** Les HP recus sont agreges par cellule monde a partir de la position victime directe ; validation reelle sur une demo FACEIT (588 dommages positionnes).
 - **Lots B2-B3 - consultation API : termines.** Le recap, la timeline par round et les cellules H-04 sont exposes depuis les tables locales derivees.
-- **Prochain lot : frontend alpha.** Mettre en forme le parcours import -> recap -> timeline -> heatmap dans le design sobre valide.
+- **Lot D1 - frontend alpha : en validation.** Le parcours import -> choix du joueur -> recap -> timeline -> heatmap est implemente et passe ses controles locaux ; il doit maintenant passer la CI et une revue visuelle avec les donnees reelles.
 - Chaque lot doit rester petit, teste sur le corpus et documente avant de passer au suivant.
 
 ## La vision en une phrase
