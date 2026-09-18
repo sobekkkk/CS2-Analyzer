@@ -34,6 +34,15 @@ export type DamageCell = {
   round_numbers: number[];
 };
 
+export type UntradedDeathCell = {
+  cell_x: number;
+  cell_y: number;
+  occurrence_count: number;
+  round_count: number;
+  round_numbers: number[];
+  death_ticks: number[];
+};
+
 export class ApiError extends Error {
   constructor(message: string) {
     super(message);
@@ -77,4 +86,8 @@ export function getTimeline(matchId: string, roundNumber?: number): Promise<Time
 
 export function getDamageCells(matchId: string): Promise<DamageCell[]> {
   return request(`/matches/${matchId}/heatmaps/damage`);
+}
+
+export function getUntradedDeathCells(matchId: string): Promise<UntradedDeathCell[]> {
+  return request(`/matches/${matchId}/heatmaps/untraded-deaths`);
 }

@@ -47,7 +47,7 @@ Le contrat complet est dans [`09_design_system.md`](09_design_system.md).
 ### EPIC C - Heatmaps contextuelles
 
 - C1. Transformation coordonnees monde -> carte 2D pour de_mirage.
-- C2. H-01 morts sans trade. **Moteur et API termines le 18 septembre 2026** : classification temporelle explicable (immediate, timely, late, untraded), carte de grille limitee aux morts non tradees avec au moins deux coequipiers vivants avant la mort, et lien vers les ticks sources.
+- C2. H-01 morts sans trade. **Moteur, API et restitution alpha termines le 18 septembre 2026** : classification temporelle explicable (immediate, timely, late, untraded), carte de grille limitee aux morts non tradees avec au moins deux coequipiers vivants avant la mort, et lien vers les ticks sources. Le rendu rappelle explicitement qu'il ne prouve ni ligne de vue ni mauvaise decision.
 - C3. H-02 premiers kills. **Moteur termine le 18 septembre 2026** : team-kills exclus, preuve directe, validation sur la demo `xSobek`.
 - C4. H-03 fenetres 5v4.
 - C5. H-04 degats recus. **Moteur et API termines le 18 septembre 2026** : HP recus agreges par cellule monde, position victime directe et liens vers les rounds sources. Le rendu carte reste a faire.
