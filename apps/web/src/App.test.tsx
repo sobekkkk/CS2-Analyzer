@@ -53,6 +53,13 @@ describe("App", () => {
             death_ticks: [1200, 2400]
           }
         ]))
+        .mockImplementationOnce(() => response([
+          {
+            round_number: 0,
+            tick: 80,
+            weapon: "ak47"
+          }
+        ]))
     );
 
     render(<App />);
@@ -63,5 +70,7 @@ describe("App", () => {
 
     expect(await screen.findByRole("heading", { name: "Où vos morts ne sont pas suivies d’un trade" })).toBeVisible();
     expect(screen.getByLabelText(/Cellule 1, -2, 2 morts sans trade observées/i)).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Vos premiers kills" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Voir la timeline du round 1" })).toBeVisible();
   });
 });

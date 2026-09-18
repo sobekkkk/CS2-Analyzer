@@ -159,6 +159,7 @@ Le front traduit `recommendation_key` via une table locale. Il ne doit pas const
 | `GET` | `/api/v1/matches/{id}/overview` | Match, stats, insights prioritaires |
 | `GET` | `/api/v1/matches/{id}/timeline?round=18` | Evenements et contexte du round |
 | `GET` | `/api/v1/matches/{id}/zones?metric=hp_lost&side=all` | Agregats de zones et occurrences sources |
+| `GET` | `/api/v1/matches/{id}/highlights/opening-kills` | Premiers kills ennemis du joueur, un par round, avec tick et arme source |
 | `GET` | `/api/v1/matches/{id}/insights/{insight_id}` | Preuves d'une observation |
 | `GET` | `/api/v1/matches/{id}/export` | Rapport JSON versionne |
 | `DELETE` | `/api/v1/matches/{id}` | Supprime donnees locales du match |
