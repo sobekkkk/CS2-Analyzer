@@ -43,7 +43,18 @@ function friendlyEventActor(event: TimelineEvent, playerId: string): string {
   return event.actor_id === playerId ? "Vous" : "Un autre joueur";
 }
 
-function Timeline({ events, playerId }: { events: TimelineEvent[]; playerId: string }) {
+function Timeline({
+  events,
+  playerId,
+  selectedRound
+}: {
+  events: TimelineEvent[];
+  playerId: string;
+  selectedRound: number | undefined;
+}) {
+  if (selectedRound === undefined) {
+    return <p className="empty-copy">Sélectionnez un round pour lire les événements sources.</p>;
+  }
   if (events.length === 0) {
     return <p className="empty-copy">Aucun événement dans ce round.</p>;
   }
@@ -183,9 +194,8 @@ export function App() {
   );
 
   async function loadReport(matchId: string, filename: string) {
-    const [overview, timeline, damageCells, untradedDeathCells, openingKills, fiveVFourCells] = await Promise.all([
+    const [overview, damageCells, untradedDeathCells, openingKills, fiveVFourCells] = await Promise.all([
       getOverview(matchId),
-      getTimeline(matchId),
       getDamageCells(matchId),
       getUntradedDeathCells(matchId),
       getOpeningKills(matchId),
@@ -195,7 +205,7 @@ export function App() {
       kind: "ready",
       filename,
       overview,
-      timeline,
+      timeline: [],
       damageCells,
       untradedDeathCells,
       openingKills,
@@ -234,6 +244,10 @@ export function App() {
 
   async function selectRound(roundNumber: number | undefined) {
     if (!activeReport) return;
+    if (roundNumber === undefined) {
+      setView({ ...activeReport, timeline: [], selectedRound: undefined });
+      return;
+    }
     setIsRoundLoading(true);
     try {
       const timeline = await getTimeline(activeReport.overview.match_id, roundNumber);
@@ -347,7 +361,11 @@ export function App() {
                     </Button>
                   ))}
                 </div>
-                <Timeline events={activeReport.timeline} playerId={activeReport.overview.selected_player.id} />
+                <Timeline
+                  events={activeReport.timeline}
+                  playerId={activeReport.overview.selected_player.id}
+                  selectedRound={activeReport.selectedRound}
+                />
               </section>
 
               <section className="panel panel--zones">
