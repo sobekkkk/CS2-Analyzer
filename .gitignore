@@ -4,6 +4,7 @@ data/
 *.dem
 __pycache__/
 .pytest_cache/
+.test-tmp/
 .ruff_cache/
 .coverage
 htmlcov/

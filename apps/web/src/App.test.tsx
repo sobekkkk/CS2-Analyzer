@@ -18,58 +18,21 @@ describe("App", () => {
     expect(screen.getByText(/seule une table dérivée pseudonymisée est conservée/i)).toBeVisible();
   });
 
-  it("renders the H-01 grid after a local player selection", async () => {
+  it("keeps the timeline compact until a round is selected", async () => {
     const response = (payload: object) => Promise.resolve(new Response(JSON.stringify(payload)));
-    vi.stubGlobal(
-      "fetch",
-      vi.fn()
-        .mockImplementationOnce(() => response({
-          id: "pending-1",
-          inspection: {
-            source_filename: "mirage.dem",
-            map_name: "de_mirage",
-            participants: [{ id: "target", display_name: "Sobek" }]
-          }
-        }))
-        .mockImplementationOnce(() => response({ match_id: "match-1" }))
-        .mockImplementationOnce(() => response({
-          match_id: "match-1",
-          map_name: "de_mirage",
-          selected_player: { id: "target", display_name: "Sobek" },
-          rounds_played: 13,
-          player_kills: 17,
-          player_deaths: 12,
-          damage_received: 921
-        }))
-        .mockImplementationOnce(() => response([]))
-        .mockImplementationOnce(() => response([]))
-        .mockImplementationOnce(() => response([
-          {
-            cell_x: 1,
-            cell_y: -2,
-            occurrence_count: 2,
-            round_count: 2,
-            round_numbers: [3, 7],
-            death_ticks: [1200, 2400]
-          }
-        ]))
-        .mockImplementationOnce(() => response([
-          {
-            round_number: 0,
-            tick: 80,
-            weapon: "ak47"
-          }
-        ]))
-        .mockImplementationOnce(() => response([
-          {
-            cell_x: 1,
-            cell_y: -2,
-            sample_count: 3,
-            round_count: 2,
-            round_numbers: [3, 7]
-          }
-        ]))
-    );
+    vi.stubGlobal("fetch", vi.fn((input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.endsWith("/demos")) return response({ id: "pending-1", inspection: { source_filename: "mirage.dem", map_name: "de_mirage", participants: [{ id: "target", display_name: "Sobek" }] } });
+      if (url.endsWith("/analyses/pending-1/player")) return response({ match_id: "match-1" });
+      if (url.endsWith("/overview")) return response({ match_id: "match-1", map_name: "de_mirage", selected_player: { id: "target", display_name: "Sobek" }, rounds_played: 13, player_kills: 17, player_deaths: 12, damage_received: 921 });
+      if (url.endsWith("/heatmaps/damage")) return response([]);
+      if (url.endsWith("/heatmaps/untraded-deaths")) return response([{ cell_x: 1, cell_y: -2, occurrence_count: 2, round_count: 2, round_numbers: [3, 7], death_ticks: [1200, 2400] }]);
+      if (url.endsWith("/highlights/opening-kills")) return response([{ round_number: 0, tick: 80, weapon: "ak47" }]);
+      if (url.endsWith("/heatmaps/five-vs-four")) return response([{ cell_x: 1, cell_y: -2, sample_count: 3, round_count: 2, round_numbers: [3, 7] }]);
+      if (url.includes("/timeline?round_number=0")) return response([{ kind: "kill", round_number: 0, tick: 90, actor_id: "target", victim_id: "enemy", weapon: "ak47" }]);
+      if (url.endsWith("/timeline")) return response([{ kind: "kill", round_number: 0, tick: 90, actor_id: "target", victim_id: "enemy", weapon: "ak47" }]);
+      throw new Error(`Unhandled request: ${url}`);
+    }));
 
     render(<App />);
     fireEvent.change(screen.getByLabelText("Importer une démo CS2"), {
@@ -84,5 +47,12 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: "Où vous êtes après un avantage 5v4" })).toBeVisible();
     expect(screen.getByLabelText(/Cellule 1, -2, 3 positions observées après un 5v4/i)).toBeVisible();
     expect(screen.getByLabelText("Carte de grille monde : positions après un avantage 5v4")).toBeVisible();
+    expect(screen.getByText("Sélectionnez un round pour lire les événements sources.")).toBeVisible();
+    expect(screen.queryByText("Aucun événement dans ce round.")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Voir la timeline du round 1" }));
+
+    expect(await screen.findByLabelText("Événements du round")).toBeVisible();
+    expect(screen.getByText("Vous")).toBeVisible();
   });
 });
