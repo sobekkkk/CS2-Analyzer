@@ -52,7 +52,9 @@ class DemoNormalizer:
         start_tick = inspection.competitive_start_tick
         round_ends = parser.parse_event("round_end", other=["total_rounds_played"])
         deaths = parser.parse_event(
-            "player_death", player=["team_num"], other=["total_rounds_played"]
+            "player_death",
+            player=["team_num", "X", "Y", "Z"],
+            other=["total_rounds_played"],
         )
         hurts = parser.parse_event(
             "player_hurt",
