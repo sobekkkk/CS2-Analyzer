@@ -70,6 +70,9 @@ button { cursor: pointer; }
 .zone-cell strong { color: #f4f6f6; display: block; font-size: 24px; font-variant-numeric: tabular-nums; letter-spacing: -.03em; margin: 13px 0 7px; }
 .zone-cell small { font-size: 11px; letter-spacing: .04em; }
 .zone-coordinates { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.untraded-death-proof { background: transparent; border: 0; color: #e3b9bd; font-size: 11px; font-weight: 700; margin-top: 11px; padding: 0; text-align: left; text-decoration: underline; text-underline-offset: 3px; }
+.untraded-death-proof:hover { color: #fff0f1; }
+.untraded-death-proof:focus-visible { outline: 3px solid #e5a7ad; outline-offset: 3px; }
 .empty-copy { color: #99a5aa; line-height: 1.55; }
 .world-grid { background-color: #12191c; background-image: linear-gradient(#29363b 1px, transparent 1px), linear-gradient(90deg, #29363b 1px, transparent 1px); background-size: 26px 26px; border: 1px solid #3a4b51; border-radius: 5px; height: 320px; margin-top: 22px; overflow: hidden; position: relative; }
 .world-grid__axis { color: #91a0a6; font-size: 10px; font-weight: 800; left: 50%; letter-spacing: .1em; position: absolute; transform: translateX(-50%); }

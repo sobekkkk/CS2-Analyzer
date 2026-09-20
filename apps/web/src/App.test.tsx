@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "./App";
@@ -30,6 +30,7 @@ describe("App", () => {
       if (url.endsWith("/highlights/opening-kills")) return response([{ round_number: 0, tick: 80, weapon: "ak47" }]);
       if (url.endsWith("/heatmaps/five-vs-four")) return response([{ cell_x: 1, cell_y: -2, sample_count: 3, round_count: 2, round_numbers: [3, 7] }]);
       if (url.includes("/timeline?round_number=0")) return response([{ kind: "kill", round_number: 0, tick: 90, actor_id: "target", victim_id: "enemy", weapon: "ak47" }]);
+      if (url.includes("/timeline?round_number=3")) return response([{ kind: "kill", round_number: 3, tick: 1200, actor_id: "enemy", victim_id: "target", weapon: "m4a1" }]);
       if (url.endsWith("/timeline")) return response([{ kind: "kill", round_number: 0, tick: 90, actor_id: "target", victim_id: "enemy", weapon: "ak47" }]);
       throw new Error(`Unhandled request: ${url}`);
     }));
@@ -42,6 +43,7 @@ describe("App", () => {
 
     expect(await screen.findByRole("heading", { name: "Où vos morts ne sont pas suivies d’un trade" })).toBeVisible();
     expect(screen.getByLabelText(/Cellule 1, -2, 2 morts sans trade observées/i)).toBeVisible();
+    expect(screen.getByRole("button", { name: "Voir la preuve du round 4" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Vos premiers kills" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Voir la timeline du round 1" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Où vous êtes après un avantage 5v4" })).toBeVisible();
@@ -54,5 +56,11 @@ describe("App", () => {
 
     expect(await screen.findByLabelText("Événements du round")).toBeVisible();
     expect(screen.getByText("Vous")).toBeVisible();
+
+    fireEvent.click(screen.getByRole("button", { name: "Voir la preuve du round 4" }));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Événements du round")).toHaveTextContent("Un autre joueur élimine un autre joueur");
+    });
   });
 });
