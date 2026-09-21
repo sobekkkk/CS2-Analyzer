@@ -112,13 +112,13 @@ Pour chaque round, retenir le premier `player_death` entre equipes opposees. Tea
 
 Si le killer est le joueur cible :
 
-- utiliser `attacker_X`, `attacker_Y`, `attacker_Z` fournis au moment de l'evenement, si disponibles ;
-- sinon prendre le dernier `PlayerSample` du killer dont le tick est inferieur ou egal au tick de mort et age de 2 ticks maximum ;
-- sinon omettre l'occurrence et incrementer `insufficient_position`.
+- echantillonner la position du killer au tick exact du kill ;
+- si l'echantillon exact est absent ou incomplet, ne pas attribuer de position a l'occurrence ;
+- l'occurrence reste visible dans le round source, mais elle est omise de la grille spatiale.
 
 ### Sorties produit
 
-`opening_kill` contient round, moment, killer, victime, arme, equipe, position, zone/cellule et issue du round. Une tendance n'est formulee qu'a partir de trois occurrences.
+`opening_kill` contient round, moment, killer, victime, arme, equipe et, seulement si l'echantillon est exact, position et zone/cellule. Une tendance n'est formulee qu'a partir de trois occurrences.
 
 ## H-03 - Position en 5v4
 

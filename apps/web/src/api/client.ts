@@ -51,6 +51,16 @@ export type OpeningKill = {
   weapon: string;
   killer_team: number;
   confidence: "direct";
+  killer_x: number | null;
+  killer_y: number | null;
+};
+
+export type OpeningKillCell = {
+  cell_x: number;
+  cell_y: number;
+  occurrence_count: number;
+  round_count: number;
+  round_numbers: number[];
 };
 
 export type FiveVFourCell = {
@@ -133,6 +143,10 @@ export function getUntradedDeathCells(matchId: string): Promise<UntradedDeathCel
 
 export function getOpeningKills(matchId: string): Promise<OpeningKill[]> {
   return request(`/matches/${matchId}/highlights/opening-kills`);
+}
+
+export function getOpeningKillCells(matchId: string): Promise<OpeningKillCell[]> {
+  return request(`/matches/${matchId}/heatmaps/opening-kills`);
 }
 
 export function getFiveVFourCells(matchId: string): Promise<FiveVFourCell[]> {

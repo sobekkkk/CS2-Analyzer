@@ -19,7 +19,23 @@ class OpeningKill(BaseModel):
     tick: int
     weapon: str
     killer_team: int
+    killer_x: float | None = None
+    killer_y: float | None = None
     confidence: str = "direct"
+
+
+class OpeningKillCell(BaseModel):
+    """Agrégat spatial H-02, uniquement avec une position de tireur exacte."""
+
+    rule_id: str = "H-02"
+    rule_version: str = "0.1"
+    cell_x: int
+    cell_y: int
+    occurrence_count: int
+    round_count: int
+    round_numbers: list[int]
+    confidence: str = "direct"
+    evidence: list[Evidence]
 
 
 class DamageCell(BaseModel):
@@ -423,7 +439,38 @@ def untraded_death_cells_for_player(
     return sorted(cells, key=lambda cell: (-cell.occurrence_count, cell.cell_x, cell.cell_y))
 
 
-def opening_kills_for_player(kills: pd.DataFrame, player_id: str) -> list[OpeningKill]:
+def opening_kill_sample_ticks(kills: pd.DataFrame) -> list[int]:
+    """Retourne les ticks où une position exacte est nécessaire pour H-02."""
+    if kills.empty:
+        return []
+    valid = _valid_enemy_kills(kills).sort_values(["round_number", "tick"])
+    return [int(kill.tick) for kill in valid.drop_duplicates(subset=["round_number"]).itertuples()]
+
+
+def _opening_kill_position_lookup(
+    player_samples: pd.DataFrame | None,
+) -> dict[tuple[str, int], tuple[float, float]]:
+    if player_samples is None or player_samples.empty:
+        return {}
+    required_columns = {"player_id", "tick", "x", "y"}
+    missing_columns = required_columns.difference(player_samples.columns)
+    if missing_columns:
+        raise ValueError("player_samples is missing columns: " + ", ".join(sorted(missing_columns)))
+    exact_samples = player_samples[
+        player_samples["player_id"].notna()
+        & player_samples["tick"].notna()
+        & player_samples["x"].notna()
+        & player_samples["y"].notna()
+    ].drop_duplicates(subset=["player_id", "tick"], keep="last")
+    return {
+        (str(sample.player_id), int(sample.tick)): (float(sample.x), float(sample.y))
+        for sample in exact_samples.itertuples(index=False)
+    }
+
+
+def opening_kills_for_player(
+    kills: pd.DataFrame, player_id: str, player_samples: pd.DataFrame | None = None
+) -> list[OpeningKill]:
     if kills.empty:
         return []
     valid = kills[
@@ -435,15 +482,57 @@ def opening_kills_for_player(kills: pd.DataFrame, player_id: str) -> list[Openin
     ].sort_values(["round_number", "tick"])
     first_kills = valid.drop_duplicates(subset=["round_number"], keep="first")
     target_openings = first_kills[first_kills["killer_id"] == player_id]
+    positions = _opening_kill_position_lookup(player_samples)
     return [
         OpeningKill(
             round_number=int(kill.round_number),
             tick=int(kill.tick),
             weapon=str(kill.weapon),
             killer_team=int(kill.killer_team),
+            killer_x=positions.get((player_id, int(kill.tick)), (None, None))[0],
+            killer_y=positions.get((player_id, int(kill.tick)), (None, None))[1],
         )
         for kill in target_openings.itertuples(index=False)
     ]
+
+
+def opening_kill_cells_for_player(
+    kills: pd.DataFrame,
+    player_id: str,
+    player_samples: pd.DataFrame | None = None,
+    *,
+    cell_size: int = 256,
+) -> list[OpeningKillCell]:
+    """Agrège H-02 seulement quand la position du tireur est exacte au tick."""
+    if cell_size <= 0:
+        raise ValueError("cell_size must be positive")
+    openings = [
+        opening
+        for opening in opening_kills_for_player(kills, player_id, player_samples)
+        if opening.killer_x is not None and opening.killer_y is not None
+    ]
+    grouped: dict[tuple[int, int], list[OpeningKill]] = {}
+    for opening in openings:
+        cell = (
+            math.floor(opening.killer_x / cell_size),
+            math.floor(opening.killer_y / cell_size),
+        )
+        grouped.setdefault(cell, []).append(opening)
+    cells = [
+        OpeningKillCell(
+            cell_x=cell_x,
+            cell_y=cell_y,
+            occurrence_count=len(openings_in_cell),
+            round_count=len({opening.round_number for opening in openings_in_cell}),
+            round_numbers=sorted({opening.round_number for opening in openings_in_cell}),
+            evidence=[
+                Evidence(round_number=opening.round_number, tick=opening.tick, kind="kill")
+                for opening in openings_in_cell
+            ],
+        )
+        for (cell_x, cell_y), openings_in_cell in grouped.items()
+    ]
+    return sorted(cells, key=lambda cell: (-cell.occurrence_count, cell.cell_x, cell.cell_y))
 
 
 def damage_cells_for_player(
