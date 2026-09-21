@@ -130,7 +130,13 @@ function EvidenceDialog({
   );
 }
 
-function DamageGrid({ cells }: { cells: DamageCell[] }) {
+function DamageGrid({
+  cells,
+  onOpenRound
+}: {
+  cells: DamageCell[];
+  onOpenRound: (roundNumber: number) => void;
+}) {
   const maximumDamage = Math.max(0, ...cells.map((cell) => cell.total_damage));
   if (cells.length === 0) {
     return <p className="empty-copy">Pas assez de données fiables pour afficher les zones de dégâts.</p>;
@@ -148,6 +154,13 @@ function DamageGrid({ cells }: { cells: DamageCell[] }) {
             <span className="zone-coordinates">{cell.cell_x} / {cell.cell_y}</span>
             <strong>{cell.total_damage} <small>HP</small></strong>
             <span>{cell.impact_count} impact{cell.impact_count > 1 ? "s" : ""} · {cell.round_count} round{cell.round_count > 1 ? "s" : ""}</span>
+            <Button
+              aria-label={`Voir la preuve du round ${(cell.round_numbers[0] ?? 0) + 1}`}
+              className="proof-action"
+              onPress={() => onOpenRound(cell.round_numbers[0] ?? 0)}
+            >
+              Ouvrir la preuve
+            </Button>
           </article>
         );
       })}
@@ -178,7 +191,7 @@ function UntradedDeathGrid({
           <span>{cell.round_count} round{cell.round_count > 1 ? "s" : ""} · tick {cell.death_ticks[0]?.toLocaleString("fr-FR")}</span>
           <Button
             aria-label={`Voir la preuve du round ${(cell.round_numbers[0] ?? 0) + 1}`}
-            className="untraded-death-proof"
+            className="proof-action"
             onPress={() => onOpenRound(cell.round_numbers[0] ?? 0)}
           >
             Ouvrir la preuve
@@ -421,7 +434,10 @@ export function App() {
                   <span className="grid-key">Grille monde</span>
                 </div>
                 <p className="panel-description">Chaque cellule agrège la position exacte de la victime au moment du dégât. Ce n’est pas encore un callout Mirage.</p>
-                <DamageGrid cells={activeReport.damageCells} />
+                <DamageGrid
+                  cells={activeReport.damageCells}
+                  onOpenRound={(roundNumber) => void openEvidence(roundNumber)}
+                />
               </section>
 
               <section className="panel panel--untraded">

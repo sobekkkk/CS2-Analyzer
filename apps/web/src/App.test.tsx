@@ -25,11 +25,12 @@ describe("App", () => {
       if (url.endsWith("/demos")) return response({ id: "pending-1", inspection: { source_filename: "mirage.dem", map_name: "de_mirage", participants: [{ id: "target", display_name: "Sobek" }] } });
       if (url.endsWith("/analyses/pending-1/player")) return response({ match_id: "match-1" });
       if (url.endsWith("/overview")) return response({ match_id: "match-1", map_name: "de_mirage", selected_player: { id: "target", display_name: "Sobek" }, rounds_played: 13, player_kills: 17, player_deaths: 12, damage_received: 921 });
-      if (url.endsWith("/heatmaps/damage")) return response([]);
+      if (url.endsWith("/heatmaps/damage")) return response([{ cell_x: 2, cell_y: -3, total_damage: 180, impact_count: 3, round_count: 1, round_numbers: [1] }]);
       if (url.endsWith("/heatmaps/untraded-deaths")) return response([{ cell_x: 1, cell_y: -2, occurrence_count: 2, round_count: 2, round_numbers: [3, 7], death_ticks: [1200, 2400] }]);
       if (url.endsWith("/highlights/opening-kills")) return response([{ round_number: 0, tick: 80, weapon: "ak47" }]);
       if (url.endsWith("/heatmaps/five-vs-four")) return response([{ cell_x: 1, cell_y: -2, sample_count: 3, round_count: 2, round_numbers: [3, 7] }]);
       if (url.includes("/timeline?round_number=0")) return response([{ kind: "kill", round_number: 0, tick: 90, actor_id: "target", actor_name: "Sobek", victim_id: "enemy", victim_name: "Enemy", weapon: "ak47" }]);
+      if (url.includes("/timeline?round_number=1")) return response([{ kind: "damage", round_number: 1, tick: 240, actor_id: "enemy", actor_name: "Enemy", victim_id: "target", victim_name: "Sobek", weapon: "m4a1", damage_health: 32 }]);
       if (url.includes("/timeline?round_number=3")) return response([{ kind: "kill", round_number: 3, tick: 1200, actor_id: "enemy", actor_name: "Enemy", victim_id: "target", victim_name: "Sobek", weapon: "m4a1" }]);
       if (url.endsWith("/timeline")) return response([{ kind: "kill", round_number: 0, tick: 90, actor_id: "target", actor_name: "Sobek", victim_id: "enemy", victim_name: "Enemy", weapon: "ak47" }]);
       throw new Error(`Unhandled request: ${url}`);
@@ -42,6 +43,7 @@ describe("App", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Sobek" }));
 
     expect(await screen.findByRole("heading", { name: "Où vos morts ne sont pas suivies d’un trade" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Voir la preuve du round 2" })).toBeVisible();
     expect(screen.getByLabelText(/Cellule 1, -2, 2 morts sans trade observées/i)).toBeVisible();
     expect(screen.getByRole("button", { name: "Voir la preuve du round 4" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Vos premiers kills" })).toBeVisible();
@@ -67,6 +69,16 @@ describe("App", () => {
     expect(await screen.findByRole("dialog", { name: "Preuve du round 4" })).toBeVisible();
     await waitFor(() => {
       expect(screen.getByLabelText("Événements du round")).toHaveTextContent("Enemy élimine Vous");
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Fermer la preuve" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("button", { name: "Voir la preuve du round 2" }));
+
+    expect(await screen.findByRole("dialog", { name: "Preuve du round 2" })).toBeVisible();
+    await waitFor(() => {
+      expect(screen.getByLabelText("Événements du round")).toHaveTextContent("Enemy inflige des dégâts à Vous · 32 HP");
     });
   });
 });

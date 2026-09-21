@@ -47,7 +47,9 @@ test("a local import reaches the player report without a real demo upload", asyn
     });
   });
   await page.route("**/api/v1/matches/match-1/heatmaps/damage", async (route) => {
-    await route.fulfill({ json: [] });
+    await route.fulfill({
+      json: [{ cell_x: 2, cell_y: -3, total_damage: 180, impact_count: 3, round_count: 1, round_numbers: [0] }]
+    });
   });
   await page.route("**/api/v1/matches/match-1/heatmaps/untraded-deaths", async (route) => {
     await route.fulfill({
@@ -90,4 +92,10 @@ test("a local import reaches the player report without a real demo upload", asyn
   await expect(untradedDeathProof).toBeVisible();
   await untradedDeathProof.click();
   await expect(page.getByRole("dialog", { name: "Preuve du round 4" })).toBeVisible();
+  await page.getByRole("button", { name: "Fermer la preuve" }).click();
+
+  const damageProof = page.getByRole("button", { name: "Voir la preuve du round 1" });
+  await expect(damageProof).toBeVisible();
+  await damageProof.click();
+  await expect(page.getByRole("dialog", { name: "Preuve du round 1" })).toBeVisible();
 });
