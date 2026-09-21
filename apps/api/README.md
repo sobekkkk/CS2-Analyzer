@@ -27,3 +27,21 @@ echantillonnees utiles a cette regle, jamais les ticks complets. Les fichiers
 `.dem` bruts ne sont pas conserves. Les evenements de timeline exposent les
 pseudonymes observes dans la demo pour les deux joueurs concernes, mais jamais
 les SteamID bruts.
+
+## Rejouer le corpus golden local
+
+Le corpus de 50 scenes est opt-in : ses `.dem` ne sont ni versionnees, ni lues
+par la CI. Les fichiers deja fournis sont detectes automatiquement dans
+`Downloads` et les replays Steam habituels. Depuis `apps/api` :
+
+```powershell
+$env:CS2_ANALYZER_RUN_GOLDEN = "1"
+& .\.venv\Scripts\python.exe -m pytest -q -m golden
+```
+
+Si vos demos sont dans d'autres dossiers, fournissez-les une fois, separes par
+des `;`, sans modifier le depot :
+
+```powershell
+$env:CS2_ANALYZER_GOLDEN_DEMO_ROOTS = "D:\CS2\demos;E:\archives\replays"
+```

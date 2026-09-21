@@ -65,7 +65,7 @@ Le contrat complet est dans [`09_design_system.md`](09_design_system.md).
 
 ### EPIC E - Qualite et livraison locale
 
-- E1. Corpus golden et tests de non-regression.
+- E1. Corpus golden et tests de non-regression. **Harnais termine le 21 septembre 2026** : 50 attentes versionnees sans demos brutes, validation des cinq signaux sur les faits normalises et execution locale opt-in. La premiere execution complete du corpus reste a planifier avant la beta privee.
 - E2. Tests differentiels avec une seconde implementation quand possible.
 - E3. Packaging Windows et guide utilisateur.
 - E4. Telemetrie locale opt-in des faux positifs (si ajoutee).

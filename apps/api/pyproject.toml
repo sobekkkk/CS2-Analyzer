@@ -29,6 +29,7 @@ dev = [
 testpaths = ["tests"]
 markers = [
   "integration: requires a local .dem file supplied by CS2_ANALYZER_DEMO",
+  "golden: validates the private local golden corpus; opt-in with CS2_ANALYZER_RUN_GOLDEN=1",
 ]
 
 [tool.ruff]
