@@ -92,6 +92,10 @@ def test_five_v_four_samples_only_the_advantaged_alive_player_before_next_death(
             "round_count": 1,
             "round_numbers": [4],
             "confidence": "inferred",
+            "evidence": [
+                {"round_number": 4, "tick": 110, "kind": "position_sample"},
+                {"round_number": 4, "tick": 120, "kind": "position_sample"},
+            ],
         }
     ]
 

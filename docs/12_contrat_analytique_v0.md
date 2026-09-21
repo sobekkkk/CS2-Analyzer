@@ -178,7 +178,7 @@ La transformation monde -> radar est un adaptateur `de_mirage` versionne et test
 | `inferred` | resultat d'une sequence/fenetre, par exemple trade ou 5v4 |
 | `insufficient_data` | champ requis absent ou position trop ancienne ; aucune insight n'est creee |
 
-Chaque insight stocke `rule_version`, parametres appliques et `evidence` structuree.
+Chaque insight stocke `rule_version`, parametres appliques et `evidence` structuree. Dans l'alpha, chaque preuve contient au minimum `{round_number, tick, kind}` ; `kind` vaut `kill`, `damage` ou `position_sample`. Une interface peut donc ouvrir le bon round sans tenter de deduire un fait depuis un libelle.
 
 ## Cas de test a fixer dans le corpus golden
 

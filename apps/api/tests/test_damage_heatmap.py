@@ -58,10 +58,19 @@ def test_damage_cells_aggregate_received_hp_by_world_grid_cell() -> None:
     assert result[0].impact_count == 1
     assert result[0].round_count == 1
     assert result[0].average_damage_per_impact == 80.0
+    assert result[0].evidence[0].model_dump() == {
+        "round_number": 3,
+        "tick": 200,
+        "kind": "damage",
+    }
     assert result[1].total_damage == 50
     assert result[1].impact_count == 2
     assert result[1].round_count == 1
     assert result[1].average_damage_per_impact == 25.0
+    assert [evidence.model_dump() for evidence in result[1].evidence] == [
+        {"round_number": 2, "tick": 100, "kind": "damage"},
+        {"round_number": 2, "tick": 120, "kind": "damage"},
+    ]
 
 
 def test_damage_cells_reject_non_positive_grid_sizes() -> None:

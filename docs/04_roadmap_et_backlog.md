@@ -56,7 +56,7 @@ Le contrat complet est dans [`09_design_system.md`](09_design_system.md).
 
 ### EPIC D - Coaching explicable
 
-- D1. Format d'evidence commun pour une `Insight`.
+- D1. Format d'evidence commun pour une `Insight`. **Moteur et API termines le 21 septembre 2026** : chaque signal H-01 a H-04 expose une observation descriptive, sa regle, sa confiance, son nombre d'occurrences et une ou plusieurs preuves `{round_number, tick, kind}`. Aucun scoring ni jugement n'est introduit dans ce lot.
 - D2. Scoring impact x repetition x confiance.
 - D3. Vue detail et recommandation courte.
 - D4. Libelle "signal a verifier" si la confiance est inferee.
