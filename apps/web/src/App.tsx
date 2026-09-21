@@ -5,6 +5,7 @@ import {
   choosePlayer,
   getDamageCells,
   getFiveVFourCells,
+  getInsights,
   getOpeningKills,
   getOverview,
   getTimeline,
@@ -12,6 +13,7 @@ import {
   inspectDemo,
   type DamageCell,
   type FiveVFourCell,
+  type Insight,
   type MatchOverview,
   type OpeningKill,
   type Participant,
@@ -35,6 +37,7 @@ type ViewState =
       untradedDeathCells: UntradedDeathCell[];
       openingKills: OpeningKill[];
       fiveVFourCells: FiveVFourCell[];
+      insights: Insight[];
       selectedRound: number | undefined;
     }
   | { kind: "error"; message: string };
@@ -269,6 +272,60 @@ function OpeningKillList({
   );
 }
 
+function confidenceLabel(insight: Insight): string {
+  if (insight.priority_level === "review" && insight.confidence === "inferred") {
+    return "Signal à vérifier · contexte inféré";
+  }
+  if (insight.priority_level === "review") return "À examiner · preuve directe";
+  if (insight.confidence === "direct") return "Contexte confirmé · preuve directe";
+  return "Contexte à vérifier · contexte inféré";
+}
+
+function InsightPriorities({
+  insights,
+  onOpenRound
+}: {
+  insights: Insight[];
+  onOpenRound: (roundNumber: number) => void;
+}) {
+  const visibleInsights = insights.slice(0, 5);
+  return (
+    <section className="panel priority-panel" aria-labelledby="priorities-heading">
+      <div className="panel-heading">
+        <div>
+          <p className="eyebrow">Lecture guidée · v0</p>
+          <h2 id="priorities-heading">Priorités à examiner</h2>
+        </div>
+        <span className="grid-key">3 à 5 signaux</span>
+      </div>
+      <p className="panel-description">Le classement est fondé sur l’impact observé, la répétition et le niveau de confiance. Ce n’est pas une note de joueur.</p>
+      {visibleInsights.length === 0 ? (
+        <p className="empty-copy">Aucun signal suffisamment étayé dans cette démo.</p>
+      ) : (
+        <ol className="insight-list" aria-label="Signaux prioritaires">
+          {visibleInsights.map((insight) => {
+            const firstEvidence = insight.evidence[0];
+            return (
+              <li key={insight.id}>
+                <Button
+                  aria-label={`Ouvrir la preuve : ${insight.title}`}
+                  className={`insight-card insight-card--${insight.priority_level}`}
+                  onPress={() => onOpenRound(firstEvidence.round_number)}
+                >
+                  <span className="insight-card__meta">{insight.rule_id} · {confidenceLabel(insight)}</span>
+                  <strong>{insight.title}</strong>
+                  <span>{insight.observation}</span>
+                  <small>{insight.recommendation}</small>
+                </Button>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+    </section>
+  );
+}
+
 export function App() {
   const [view, setView] = useState<ViewState>({ kind: "empty" });
   const [isRoundLoading, setIsRoundLoading] = useState(false);
@@ -277,12 +334,13 @@ export function App() {
   const activeReport = view.kind === "ready" ? view : null;
 
   async function loadReport(matchId: string, filename: string) {
-    const [overview, damageCells, untradedDeathCells, openingKills, fiveVFourCells] = await Promise.all([
+    const [overview, damageCells, untradedDeathCells, openingKills, fiveVFourCells, insights] = await Promise.all([
       getOverview(matchId),
       getDamageCells(matchId),
       getUntradedDeathCells(matchId),
       getOpeningKills(matchId),
-      getFiveVFourCells(matchId)
+      getFiveVFourCells(matchId),
+      getInsights(matchId)
     ]);
     setView({
       kind: "ready",
@@ -293,6 +351,7 @@ export function App() {
       untradedDeathCells,
       openingKills,
       fiveVFourCells,
+      insights,
       selectedRound: undefined
     });
   }
@@ -433,6 +492,11 @@ export function App() {
               <article><span>Morts</span><strong>{activeReport.overview.player_deaths}</strong></article>
               <article><span>HP reçus</span><strong>{activeReport.overview.damage_received}</strong></article>
             </section>
+
+            <InsightPriorities
+              insights={activeReport.insights}
+              onOpenRound={(roundNumber) => void openEvidence(roundNumber)}
+            />
 
             <div className="report-grid">
               <section className="panel panel--zones">

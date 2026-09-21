@@ -95,3 +95,14 @@ class Insight(BaseModel):
     confidence: Literal["direct", "inferred"]
     occurrence_count: int = Field(ge=1)
     evidence: list[Evidence] = Field(min_length=1)
+    priority_score: int = Field(
+        default=0,
+        ge=0,
+        le=100,
+        description="Ordre de lecture explicable, pas une note de performance.",
+    )
+    priority_level: Literal["review", "context"] = "context"
+    priority_reasons: list[
+        Literal["impact", "repetition", "direct_evidence", "inferred_context"]
+    ] = Field(default_factory=list)
+    recommendation: str = "Ouvrez le round source pour relire les faits observés."

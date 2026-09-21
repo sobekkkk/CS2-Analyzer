@@ -64,6 +64,26 @@ test("a local import reaches the player report without a real demo upload", asyn
       json: [{ cell_x: 1, cell_y: -2, sample_count: 3, round_count: 2, round_numbers: [3, 7] }]
     });
   });
+  await page.route("**/api/v1/matches/match-1/insights", async (route) => {
+    await route.fulfill({
+      json: [
+        {
+          id: "H-01:1:-2",
+          rule_id: "H-01",
+          rule_version: "0.1",
+          title: "Morts sans trade observées",
+          observation: "2 morts non suivies d’un trade dans cette zone de grille.",
+          confidence: "inferred",
+          occurrence_count: 2,
+          evidence: [{ round_number: 3, tick: 1200, kind: "kill" }],
+          priority_score: 80,
+          priority_level: "review",
+          priority_reasons: ["impact", "repetition", "inferred_context"],
+          recommendation: "Ouvrez le round source pour vérifier la séquence avant d’en tirer une conclusion."
+        }
+      ]
+    });
+  });
 
   await page.goto("/");
   await page.getByLabel("Importer une démo CS2").setInputFiles({
@@ -74,6 +94,11 @@ test("a local import reaches the player report without a real demo upload", asyn
   await page.getByRole("button", { name: "Sobek" }).click();
 
   await expect(page.getByRole("heading", { name: "Sobek" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Priorités à examiner" })).toBeVisible();
+  await expect(page.getByText(/Signal à vérifier · contexte inféré/)).toBeVisible();
+  await page.getByRole("button", { name: /Ouvrir la preuve : Morts sans trade observées/i }).click();
+  await expect(page.getByRole("dialog", { name: "Preuve du round 4" })).toBeVisible();
+  await page.getByRole("button", { name: "Fermer la preuve" }).click();
   await expect(page.getByRole("heading", { name: "Où vos morts ne sont pas suivies d’un trade" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Vos premiers kills" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Où vous êtes après un avantage 5v4" })).toBeVisible();

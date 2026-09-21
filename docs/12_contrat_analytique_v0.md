@@ -180,6 +180,18 @@ La transformation monde -> radar est un adaptateur `de_mirage` versionne et test
 
 Chaque insight stocke `rule_version`, parametres appliques et `evidence` structuree. Dans l'alpha, chaque preuve contient au minimum `{round_number, tick, kind}` ; `kind` vaut `kill`, `damage` ou `position_sample`. Une interface peut donc ouvrir le bon round sans tenter de deduire un fait depuis un libelle.
 
+## Priorisation de lecture v0
+
+Une `Insight` peut exposer `priority_score`, `priority_level`, `priority_reasons` et `recommendation`. Ces champs servent uniquement a ordonner la lecture du rapport ; ils ne constituent pas un score de joueur, une prediction ni un diagnostic de mauvaise decision.
+
+- `priority_level = review` : observation a relire en priorite, actuellement H-01 et H-04 ;
+- `priority_level = context` : contexte utile, actuellement H-02 et H-03 ;
+- `priority_reasons` rend explicites les facteurs parmi `impact`, `repetition`, `direct_evidence` et `inferred_context` ;
+- une confiance `inferred` est toujours affichee comme un « signal a verifier » ;
+- `recommendation` indique une action de relecture du round source, jamais une instruction tactique presentee comme certaine.
+
+Le classement est deterministe, borne entre 0 et 100 et teste. L'interface limite sa restitution aux cinq premiers signaux ; l'API conserve les autres observations sourcees pour ne pas perdre d'information.
+
 ## Cas de test a fixer dans le corpus golden
 
 Avant implementation definitive, choisir et etiqueter manuellement :

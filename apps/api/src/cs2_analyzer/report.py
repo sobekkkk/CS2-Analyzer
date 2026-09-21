@@ -108,13 +108,71 @@ def timeline_for_match(
     return sorted(events, key=lambda event: (event.tick, event.kind))
 
 
-def insights_for_match(match: CanonicalMatch, selected_player_id: str) -> list[Insight]:
-    """Assemble les signaux existants en observations sourcées, sans scoring.
+def prioritize_insights(insights: list[Insight]) -> list[Insight]:
+    """Ordonne les observations sans produire de score de joueur.
 
-    Cette couche est volontairement descriptive : D2 décidera plus tard de leur
-    ordre de priorité, mais aucun consommateur n'a à reconstruire une preuve à
-    partir d'un libellé d'interface.
+    Le score est un signal d'ordre de lecture, fondé sur la règle, la répétition
+    et le niveau de preuve. Il reste attaché à des recommandations de relecture
+    pour éviter de présenter une causalité ou une "mauvaise décision" inférée.
     """
+    policy = {
+        "H-01": {
+            "base_score": 70,
+            "level": "review",
+            "impact": True,
+            "recommendation": (
+                "Ouvrez le round source pour vérifier la séquence avant d’en tirer une conclusion."
+            ),
+        },
+        "H-02": {
+            "base_score": 20,
+            "level": "context",
+            "impact": False,
+            "recommendation": "Relisez le premier duel dans le round source.",
+        },
+        "H-03": {
+            "base_score": 24,
+            "level": "context",
+            "impact": False,
+            "recommendation": "Comparez ce placement à la suite du round source.",
+        },
+        "H-04": {
+            "base_score": 55,
+            "level": "review",
+            "impact": True,
+            "recommendation": (
+                "Relisez le round source avant d’en déduire une habitude de positionnement."
+            ),
+        },
+    }
+
+    prioritized: list[Insight] = []
+    for insight in insights:
+        rule_policy = policy[insight.rule_id]
+        reasons: list[str] = []
+        if rule_policy["impact"]:
+            reasons.append("impact")
+        if insight.occurrence_count > 1:
+            reasons.append("repetition")
+        reasons.append("direct_evidence" if insight.confidence == "direct" else "inferred_context")
+        score = min(100, rule_policy["base_score"] + min(insight.occurrence_count, 3) * 5)
+        if insight.confidence == "direct":
+            score = min(100, score + 3)
+        prioritized.append(
+            insight.model_copy(
+                update={
+                    "priority_score": score,
+                    "priority_level": rule_policy["level"],
+                    "priority_reasons": reasons,
+                    "recommendation": rule_policy["recommendation"],
+                }
+            )
+        )
+    return sorted(prioritized, key=lambda insight: (-insight.priority_score, insight.id))
+
+
+def insights_for_match(match: CanonicalMatch, selected_player_id: str) -> list[Insight]:
+    """Assemble et priorise des signaux sourcés, sans jugement de joueur."""
     insights: list[Insight] = []
     for cell in untraded_death_cells_for_player(
         match.kills,
@@ -201,4 +259,4 @@ def insights_for_match(match: CanonicalMatch, selected_player_id: str) -> list[I
             )
         )
 
-    return insights
+    return prioritize_insights(insights)
