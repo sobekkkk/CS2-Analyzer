@@ -85,7 +85,9 @@ button { cursor: pointer; }
 .world-grid__axis { color: #91a0a6; font-size: 10px; font-weight: 800; left: 50%; letter-spacing: .1em; position: absolute; transform: translateX(-50%); }
 .world-grid__axis--north { top: 9px; }
 .world-grid__axis--south { bottom: 9px; }
-.world-cell { border: 1px solid #46727b; border-radius: 4px; box-shadow: 0 0 0 2px #12191c; color: #eaf4f5; min-width: 50px; padding: 5px 6px; position: absolute; text-align: center; transform: translate(-50%, -50%); }
+.world-cell { border: 1px solid #46727b; border-radius: 4px; box-shadow: 0 0 0 2px #12191c; color: #eaf4f5; cursor: pointer; min-width: 50px; padding: 5px 6px; position: absolute; text-align: center; transform: translate(-50%, -50%); }
+.world-cell:hover { filter: brightness(1.12); }
+.world-cell:focus-visible { outline: 3px solid #d7f5fa; outline-offset: 3px; z-index: 1; }
 .world-cell--intensity-0 { background: #263a3e; }
 .world-cell--intensity-1 { background: #28505a; }
 .world-cell--intensity-2 { background: #2f6774; }
