@@ -39,7 +39,7 @@ Le contrat complet est dans [`09_design_system.md`](09_design_system.md).
 
 - B1. Selection du joueur cible. **Termine le 18 septembre 2026** : staging temporaire, choix controle, profil local et suppression de la demo apres analyse.
 - B2. Recap score/equipes/statistiques. **Termine le 18 septembre 2026** : recap local pseudonymise (rounds, K/D, HP recus) expose par API.
-- B3. Timeline filtrable par round. **Termine le 18 septembre 2026** : faits de degats et morts tries au tick, avec filtre de round et test de contrat API.
+- B3. Preuve de round a la demande. **Termine le 21 septembre 2026** : faits de degats et morts tries au tick, ouverts depuis un signal dans une boite de dialogue a defilement propre ; aucun flux d’evenements ne prend de place dans le rapport sans demande explicite.
 - B4. Gestion d'erreurs lisible.
 
 **Definition of done :** un testeur retrouve la mort citee par une observation en moins de 30 secondes.

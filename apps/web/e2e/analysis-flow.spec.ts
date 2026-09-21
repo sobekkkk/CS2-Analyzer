@@ -63,15 +63,17 @@ test("a local import reaches the player report without a real demo upload", asyn
   await expect(page.getByRole("heading", { name: "Où vous êtes après un avantage 5v4" })).toBeVisible();
   await expect(page.getByLabel(/Cellule 1, -2, 3 positions observées après un 5v4/i)).toBeVisible();
   await expect(page.getByLabel("Carte de grille monde : positions après un avantage 5v4")).toBeVisible();
-  await expect(page.getByText("Sélectionnez un round pour lire les événements sources.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Timeline" })).toHaveCount(0);
   const openingKill = page.getByRole("button", { name: "Voir la timeline du round 1" });
   await expect(openingKill).toBeVisible();
   await openingKill.click();
-  await expect(page.getByRole("button", { name: "Round 1", exact: true })).toHaveClass(/is-selected/);
+  await expect(page.getByRole("dialog", { name: "Preuve du round 1" })).toBeVisible();
   await expect(page.getByText("Aucun événement dans ce round.")).toBeVisible();
+  await page.getByRole("button", { name: "Fermer la preuve" }).click();
+  await expect(page.getByRole("dialog", { name: "Preuve du round 1" })).toHaveCount(0);
 
   const untradedDeathProof = page.getByRole("button", { name: "Voir la preuve du round 4" });
   await expect(untradedDeathProof).toBeVisible();
   await untradedDeathProof.click();
-  await expect(page.getByRole("button", { name: "Round 4", exact: true })).toHaveClass(/is-selected/);
+  await expect(page.getByRole("dialog", { name: "Preuve du round 4" })).toBeVisible();
 });

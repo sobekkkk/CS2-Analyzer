@@ -18,7 +18,7 @@ describe("App", () => {
     expect(screen.getByText(/seule une table dérivée pseudonymisée est conservée/i)).toBeVisible();
   });
 
-  it("keeps the timeline compact until a round is selected", async () => {
+  it("opens source evidence on demand without reserving report space", async () => {
     const response = (payload: object) => Promise.resolve(new Response(JSON.stringify(payload)));
     vi.stubGlobal("fetch", vi.fn((input: RequestInfo | URL) => {
       const url = String(input);
@@ -49,16 +49,21 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: "Où vous êtes après un avantage 5v4" })).toBeVisible();
     expect(screen.getByLabelText(/Cellule 1, -2, 3 positions observées après un 5v4/i)).toBeVisible();
     expect(screen.getByLabelText("Carte de grille monde : positions après un avantage 5v4")).toBeVisible();
-    expect(screen.getByText("Sélectionnez un round pour lire les événements sources.")).toBeVisible();
-    expect(screen.queryByText("Aucun événement dans ce round.")).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Timeline" })).not.toBeInTheDocument();
+    expect(screen.queryByText("Sélectionnez un round pour lire les événements sources.")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Voir la timeline du round 1" }));
 
+    expect(await screen.findByRole("dialog", { name: "Preuve du round 1" })).toBeVisible();
     expect(await screen.findByLabelText("Événements du round")).toBeVisible();
     expect(screen.getByText("Vous")).toBeVisible();
 
+    fireEvent.click(screen.getByRole("button", { name: "Fermer la preuve" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+
     fireEvent.click(screen.getByRole("button", { name: "Voir la preuve du round 4" }));
 
+    expect(await screen.findByRole("dialog", { name: "Preuve du round 4" })).toBeVisible();
     await waitFor(() => {
       expect(screen.getByLabelText("Événements du round")).toHaveTextContent("Un autre joueur élimine un autre joueur");
     });

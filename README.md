@@ -9,7 +9,7 @@ Ce dossier fige les decisions de produit avant de commencer le code. Il est ecri
 - **Lot C3 - moteur H-02 : termine.** Les opening kills sont calcules avec preuve directe ; validation reelle sur la demo `xSobek` (3 occurrences).
 - **Lot C5 - moteur H-04 : termine.** Les HP recus sont agreges par cellule monde a partir de la position victime directe ; validation reelle sur une demo FACEIT (588 dommages positionnes).
 - **Lots B2-B3 - consultation API : termines.** Le recap, la timeline par round et les cellules H-04 sont exposes depuis les tables locales derivees.
-- **Lot D1 - frontend alpha : en validation.** Le parcours import -> choix du joueur -> recap -> timeline -> heatmap est implemente et passe ses controles locaux ; il doit maintenant passer la CI et une revue visuelle avec les donnees reelles.
+- **Lot D1 - frontend alpha : en validation.** Le parcours import -> choix du joueur -> recap -> signaux -> preuves par round a la demande est implemente et passe ses controles locaux ; il doit maintenant passer la CI et une revue visuelle avec les donnees reelles.
 - Chaque lot doit rester petit, teste sur le corpus et documente avant de passer au suivant.
 
 ## La vision en une phrase
@@ -46,7 +46,7 @@ Le MVP est un outil **local, post-match et mono-utilisateur**. Il importe une de
 - un recap de match et de rounds ;
 - quatre heatmaps contextuelles ;
 - des observations de coaching expliquees avec leur niveau de confiance ;
-- une timeline et des liens vers les moments concernes.
+- des preuves par round et des liens vers les moments concernes, ouvertes uniquement lorsqu’un signal doit etre verifie.
 
 Le live, le replay 3D, la video automatique, la voix, le classement public et une IA generative libre sont volontairement hors MVP.
 
