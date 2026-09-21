@@ -28,6 +28,7 @@ describe("App", () => {
       if (url.endsWith("/heatmaps/damage")) return response([{ cell_x: 2, cell_y: -3, total_damage: 180, impact_count: 3, round_count: 1, round_numbers: [1] }]);
       if (url.endsWith("/heatmaps/untraded-deaths")) return response([{ cell_x: 1, cell_y: -2, occurrence_count: 2, round_count: 2, round_numbers: [3, 7], death_ticks: [1200, 2400] }]);
       if (url.endsWith("/highlights/opening-kills")) return response([{ round_number: 0, tick: 80, weapon: "ak47" }]);
+      if (url.endsWith("/heatmaps/opening-kills")) return response([{ cell_x: 2, cell_y: -3, occurrence_count: 1, round_count: 1, round_numbers: [0] }]);
       if (url.endsWith("/heatmaps/five-vs-four")) return response([{ cell_x: 1, cell_y: -2, sample_count: 3, round_count: 2, round_numbers: [3, 7] }]);
       if (url.endsWith("/insights")) return response([
         { id: "H-01:1:-2", rule_id: "H-01", rule_version: "0.1", title: "Morts sans trade observées", observation: "2 morts non suivies d’un trade dans cette zone de grille.", confidence: "inferred", occurrence_count: 2, evidence: [{ round_number: 3, tick: 1200, kind: "kill" }], priority_score: 80, priority_level: "review", priority_reasons: ["impact", "repetition", "inferred_context"], recommendation: "Ouvrez le round source pour vérifier la séquence avant d’en tirer une conclusion." },
@@ -58,7 +59,11 @@ describe("App", () => {
     expect(screen.getByRole("button", { name: "Voir la preuve du round 2" })).toBeVisible();
     expect(screen.getByLabelText(/Cellule 1, -2, 2 morts sans trade observées/i)).toBeVisible();
     expect(screen.getByRole("button", { name: "Voir la preuve du round 4" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Vos premiers kills" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "D’où vous obtenez vos premiers kills" })).toBeVisible();
+    expect(screen.getByLabelText("Carte de grille monde : positions de premiers kills")).toBeVisible();
+    const openingKillPanel = screen.getByRole("heading", { name: "D’où vous obtenez vos premiers kills" }).closest("section");
+    expect(openingKillPanel).not.toBeNull();
+    expect(within(openingKillPanel!).getByRole("button", { name: /Voir la preuve du round 1 : cellule 2, -3, 1 premier kill/i })).toBeVisible();
     expect(screen.getByRole("button", { name: "Voir la timeline du round 1" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Où vous êtes après un avantage 5v4" })).toBeVisible();
     expect(screen.getByRole("button", { name: /Voir la preuve du round 4 : cellule 1, -2, 3 positions observées après un 5v4/i })).toBeVisible();

@@ -8,7 +8,7 @@ from demoparser2 import DemoParser
 
 from .inspection import DemoInspector, participant_id
 from .models import DemoInspection
-from .rules import five_v_four_sample_ticks
+from .rules import five_v_four_sample_ticks, opening_kill_sample_ticks
 
 
 @dataclass(frozen=True)
@@ -63,8 +63,12 @@ class DemoNormalizer:
         )
         rounds = self._normalize_rounds(round_ends, start_tick)
         kills = self._normalize_kills(deaths, start_tick)
-        sample_ticks = five_v_four_sample_ticks(
-            kills, rounds, tick_interval_seconds=inspection.tick_interval_seconds
+        sample_ticks = sorted(
+            set(
+                five_v_four_sample_ticks(
+                    kills, rounds, tick_interval_seconds=inspection.tick_interval_seconds
+                )
+            ).union(opening_kill_sample_ticks(kills))
         )
         raw_player_samples = (
             parser.parse_ticks(["X", "Y", "is_alive", "team_num"], ticks=sample_ticks)

@@ -6,6 +6,7 @@ import {
   getDamageCells,
   getFiveVFourCells,
   getInsights,
+  getOpeningKillCells,
   getOpeningKills,
   getOverview,
   getTimeline,
@@ -16,6 +17,7 @@ import {
   type Insight,
   type MatchOverview,
   type OpeningKill,
+  type OpeningKillCell,
   type Participant,
   type TimelineEvent,
   type UntradedDeathCell
@@ -36,6 +38,7 @@ type ViewState =
       damageCells: DamageCell[];
       untradedDeathCells: UntradedDeathCell[];
       openingKills: OpeningKill[];
+      openingKillCells: OpeningKillCell[];
       fiveVFourCells: FiveVFourCell[];
       insights: Insight[];
       selectedRound: number | undefined;
@@ -272,6 +275,44 @@ function OpeningKillList({
   );
 }
 
+function OpeningKillGrid({
+  cells,
+  onOpenRound
+}: {
+  cells: OpeningKillCell[];
+  onOpenRound: (roundNumber: number) => void;
+}) {
+  if (cells.length === 0) {
+    return <p className="empty-copy">Aucune position exacte de premier kill disponible dans cette démo.</p>;
+  }
+  const viewport = createWorldViewport(cells);
+  const maximumOccurrences = Math.max(...cells.map((cell) => cell.occurrence_count));
+  if (!viewport) return null;
+  return (
+    <div className="world-grid world-grid--opening" aria-label="Carte de grille monde : positions de premiers kills" role="group">
+      <span className="world-grid__axis world-grid__axis--north" aria-hidden="true">N</span>
+      <span className="world-grid__axis world-grid__axis--south" aria-hidden="true">S</span>
+      {cells.map((cell) => {
+        const point = worldGridPoint(cell, viewport);
+        const intensity = damageTone(cell.occurrence_count, maximumOccurrences);
+        return (
+          <Button
+            className={`world-cell world-cell--opening world-cell--intensity-${intensity}`}
+            key={`${cell.cell_x}-${cell.cell_y}`}
+            aria-label={`Voir la preuve du round ${(cell.round_numbers[0] ?? 0) + 1} : cellule ${cell.cell_x}, ${cell.cell_y}, ${cell.occurrence_count} premier kill${cell.occurrence_count > 1 ? "s" : ""}`}
+            onPress={() => onOpenRound(cell.round_numbers[0] ?? 0)}
+            style={{ left: `${point.left}%`, top: `${point.top}%` }}
+          >
+            <strong>{cell.occurrence_count}</strong>
+            <span>{cell.cell_x} / {cell.cell_y}</span>
+            <small>{cell.round_count} round{cell.round_count > 1 ? "s" : ""} · preuve</small>
+          </Button>
+        );
+      })}
+    </div>
+  );
+}
+
 function confidenceLabel(insight: Insight): string {
   if (insight.priority_level === "review" && insight.confidence === "inferred") {
     return "Signal à vérifier · contexte inféré";
@@ -334,11 +375,12 @@ export function App() {
   const activeReport = view.kind === "ready" ? view : null;
 
   async function loadReport(matchId: string, filename: string) {
-    const [overview, damageCells, untradedDeathCells, openingKills, fiveVFourCells, insights] = await Promise.all([
+    const [overview, damageCells, untradedDeathCells, openingKills, openingKillCells, fiveVFourCells, insights] = await Promise.all([
       getOverview(matchId),
       getDamageCells(matchId),
       getUntradedDeathCells(matchId),
       getOpeningKills(matchId),
+      getOpeningKillCells(matchId),
       getFiveVFourCells(matchId),
       getInsights(matchId)
     ]);
@@ -350,6 +392,7 @@ export function App() {
       damageCells,
       untradedDeathCells,
       openingKills,
+      openingKillCells,
       fiveVFourCells,
       insights,
       selectedRound: undefined
@@ -525,10 +568,11 @@ export function App() {
 
               <section className="panel panel--opening-kills">
                 <div className="panel-heading">
-                  <div><p className="eyebrow">H-02 · Confiance directe</p><h2>Vos premiers kills</h2></div>
-                  <span className="grid-key">Contexte round</span>
+                  <div><p className="eyebrow">H-02 · Confiance directe</p><h2>D’où vous obtenez vos premiers kills</h2></div>
+                  <span className="grid-key">Grille monde</span>
                 </div>
-                <p className="panel-description">Chaque élément est le premier kill ennemi du round. Ouvrez le round pour relire la séquence.</p>
+                <p className="panel-description">La grille utilise uniquement la position exacte du tireur au tick du premier kill adverse. Les kills sans position fiable restent consultables par round.</p>
+                <OpeningKillGrid cells={activeReport.openingKillCells} onOpenRound={(roundNumber) => void openEvidence(roundNumber)} />
                 <OpeningKillList kills={activeReport.openingKills} onOpenRound={(roundNumber) => void openEvidence(roundNumber)} />
               </section>
 

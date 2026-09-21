@@ -104,6 +104,8 @@ button { cursor: pointer; }
 .world-cell--intensity-1 { background: #28505a; }
 .world-cell--intensity-2 { background: #2f6774; }
 .world-cell--intensity-3 { background: #388495; border-color: #68b5c5; }
+.world-grid--opening { height: 250px; }
+.world-cell--opening { border-color: #518fae; }
 .world-cell strong, .world-cell span, .world-cell small { display: block; }
 .world-cell strong { font-size: 15px; font-variant-numeric: tabular-nums; }
 .world-cell span, .world-cell small { color: #d2e0e2; font-size: 9px; line-height: 1.35; }

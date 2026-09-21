@@ -57,7 +57,12 @@ test("a local import reaches the player report without a real demo upload", asyn
     });
   });
   await page.route("**/api/v1/matches/match-1/highlights/opening-kills", async (route) => {
-    await route.fulfill({ json: [{ round_number: 0, tick: 80, weapon: "ak47", killer_team: 2, confidence: "direct" }] });
+    await route.fulfill({ json: [{ round_number: 0, tick: 80, weapon: "ak47", killer_team: 2, killer_x: 512, killer_y: -768, confidence: "direct" }] });
+  });
+  await page.route("**/api/v1/matches/match-1/heatmaps/opening-kills", async (route) => {
+    await route.fulfill({
+      json: [{ cell_x: 2, cell_y: -3, occurrence_count: 1, round_count: 1, round_numbers: [0] }]
+    });
   });
   await page.route("**/api/v1/matches/match-1/heatmaps/five-vs-four", async (route) => {
     await route.fulfill({
@@ -100,7 +105,9 @@ test("a local import reaches the player report without a real demo upload", asyn
   await expect(page.getByRole("dialog", { name: "Preuve du round 4" })).toBeVisible();
   await page.getByRole("button", { name: "Fermer la preuve" }).click();
   await expect(page.getByRole("heading", { name: "Où vos morts ne sont pas suivies d’un trade" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Vos premiers kills" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "D’où vous obtenez vos premiers kills" })).toBeVisible();
+  await expect(page.getByLabel("Carte de grille monde : positions de premiers kills")).toBeVisible();
+  await expect(page.getByRole("button", { name: /Voir la preuve du round 1 : cellule 2, -3, 1 premier kill/i })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Où vous êtes après un avantage 5v4" })).toBeVisible();
   await expect(page.getByRole("button", { name: /Voir la preuve du round 4 : cellule 1, -2, 3 positions observées après un 5v4/i })).toBeVisible();
   await expect(page.getByLabel("Carte de grille monde : positions après un avantage 5v4")).toBeVisible();
@@ -119,7 +126,7 @@ test("a local import reaches the player report without a real demo upload", asyn
   await expect(page.getByRole("dialog", { name: "Preuve du round 4" })).toBeVisible();
   await page.getByRole("button", { name: "Fermer la preuve" }).click();
 
-  const damageProof = page.getByRole("button", { name: "Voir la preuve du round 1" });
+  const damageProof = page.locator("section.panel--zones").getByRole("button", { name: "Voir la preuve du round 1" });
   await expect(damageProof).toBeVisible();
   await damageProof.click();
   await expect(page.getByRole("dialog", { name: "Preuve du round 1" })).toBeVisible();

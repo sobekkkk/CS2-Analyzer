@@ -23,9 +23,11 @@ from .rules import (
     DamageCell,
     FiveVFourCell,
     OpeningKill,
+    OpeningKillCell,
     UntradedDeathCell,
     damage_cells_for_player,
     five_v_four_cells_for_player,
+    opening_kill_cells_for_player,
     opening_kills_for_player,
     untraded_death_cells_for_player,
 )
@@ -113,7 +115,27 @@ def damage_heatmap(
 def opening_kill_highlights(match_id: str) -> list[OpeningKill]:
     """Expose les premiers kills du joueur, preuves H-02 par round."""
     stored = _stored_match_or_404(match_id)
-    return opening_kills_for_player(stored.match.kills, stored.selected_player_id)
+    return opening_kills_for_player(
+        stored.match.kills, stored.selected_player_id, stored.match.player_samples
+    )
+
+
+@app.get(
+    "/api/v1/matches/{match_id}/heatmaps/opening-kills",
+    response_model=list[OpeningKillCell],
+    responses={404: {"model": ErrorResponse}},
+)
+def opening_kill_heatmap(
+    match_id: str, cell_size: int = Query(default=256, ge=1, le=2_048)
+) -> list[OpeningKillCell]:
+    """Expose les positions exactes d'où le joueur obtient un premier kill."""
+    stored = _stored_match_or_404(match_id)
+    return opening_kill_cells_for_player(
+        stored.match.kills,
+        stored.selected_player_id,
+        stored.match.player_samples,
+        cell_size=cell_size,
+    )
 
 
 @app.get(

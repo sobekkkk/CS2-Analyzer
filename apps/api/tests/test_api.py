@@ -175,12 +175,20 @@ def test_exposes_saved_match_overview_and_filtered_timeline(tmp_path, monkeypatc
             [
                 {
                     "player_id": "target",
+                    "tick": 80,
+                    "team_num": 2,
+                    "is_alive": True,
+                    "x": 300.0,
+                    "y": -300.0,
+                },
+                {
+                    "player_id": "target",
                     "tick": 144,
                     "team_num": 2,
                     "is_alive": True,
                     "x": 300.0,
                     "y": -300.0,
-                }
+                },
             ]
         ),
     )
@@ -193,6 +201,9 @@ def test_exposes_saved_match_overview_and_filtered_timeline(tmp_path, monkeypatc
     timeline = client.get(f"/api/v1/matches/{'d' * 16}/timeline?round_number=2")
     damage_cells = client.get(f"/api/v1/matches/{'d' * 16}/heatmaps/damage?cell_size=256")
     opening_kills = client.get(f"/api/v1/matches/{'d' * 16}/highlights/opening-kills")
+    opening_kill_cells = client.get(
+        f"/api/v1/matches/{'d' * 16}/heatmaps/opening-kills?cell_size=256"
+    )
     untraded_death_cells = client.get(
         f"/api/v1/matches/{'d' * 16}/heatmaps/untraded-deaths?cell_size=256"
     )
@@ -222,7 +233,23 @@ def test_exposes_saved_match_overview_and_filtered_timeline(tmp_path, monkeypatc
             "tick": 80,
             "weapon": "ak47",
             "killer_team": 2,
+            "killer_x": 300.0,
+            "killer_y": -300.0,
             "confidence": "direct",
+        }
+    ]
+    assert opening_kill_cells.status_code == 200
+    assert opening_kill_cells.json() == [
+        {
+            "rule_id": "H-02",
+            "rule_version": "0.1",
+            "cell_x": 1,
+            "cell_y": -2,
+            "occurrence_count": 1,
+            "round_count": 1,
+            "round_numbers": [1],
+            "confidence": "direct",
+            "evidence": [{"round_number": 1, "tick": 80, "kind": "kill"}],
         }
     ]
     assert untraded_death_cells.status_code == 200
