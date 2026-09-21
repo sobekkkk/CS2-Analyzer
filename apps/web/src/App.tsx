@@ -102,7 +102,13 @@ function DamageGrid({ cells }: { cells: DamageCell[] }) {
   );
 }
 
-function UntradedDeathGrid({ cells }: { cells: UntradedDeathCell[] }) {
+function UntradedDeathGrid({
+  cells,
+  onOpenRound
+}: {
+  cells: UntradedDeathCell[];
+  onOpenRound: (roundNumber: number) => void;
+}) {
   if (cells.length === 0) {
     return <p className="empty-copy">Aucune mort sans trade observée ne remplit les conditions de cette carte.</p>;
   }
@@ -117,6 +123,13 @@ function UntradedDeathGrid({ cells }: { cells: UntradedDeathCell[] }) {
           <span className="zone-coordinates">{cell.cell_x} / {cell.cell_y}</span>
           <strong>{cell.occurrence_count} <small>mort{cell.occurrence_count > 1 ? "s" : ""}</small></strong>
           <span>{cell.round_count} round{cell.round_count > 1 ? "s" : ""} · tick {cell.death_ticks[0]?.toLocaleString("fr-FR")}</span>
+          <Button
+            aria-label={`Voir la preuve du round ${(cell.round_numbers[0] ?? 0) + 1}`}
+            className="untraded-death-proof"
+            onPress={() => onOpenRound(cell.round_numbers[0] ?? 0)}
+          >
+            Ouvrir la preuve
+          </Button>
         </article>
       ))}
     </div>
@@ -383,7 +396,10 @@ export function App() {
                   <span className="grid-key">Grille monde</span>
                 </div>
                 <p className="panel-description">Une occurrence signifie qu’aucun coéquipier n’a éliminé le même adversaire dans les 5 secondes. Cela ne prouve ni ligne de vue ni mauvaise décision.</p>
-                <UntradedDeathGrid cells={activeReport.untradedDeathCells} />
+                <UntradedDeathGrid
+                  cells={activeReport.untradedDeathCells}
+                  onOpenRound={(roundNumber) => void selectRound(roundNumber)}
+                />
               </section>
 
               <section className="panel panel--opening-kills">

@@ -36,7 +36,9 @@ test("a local import reaches the player report without a real demo upload", asyn
     await route.fulfill({ json: [] });
   });
   await page.route("**/api/v1/matches/match-1/heatmaps/untraded-deaths", async (route) => {
-    await route.fulfill({ json: [] });
+    await route.fulfill({
+      json: [{ cell_x: 1, cell_y: -2, occurrence_count: 2, round_count: 2, round_numbers: [3, 7], death_ticks: [1200, 2400] }]
+    });
   });
   await page.route("**/api/v1/matches/match-1/highlights/opening-kills", async (route) => {
     await route.fulfill({ json: [{ round_number: 0, tick: 80, weapon: "ak47", killer_team: 2, confidence: "direct" }] });
@@ -67,4 +69,9 @@ test("a local import reaches the player report without a real demo upload", asyn
   await openingKill.click();
   await expect(page.getByRole("button", { name: "Round 1", exact: true })).toHaveClass(/is-selected/);
   await expect(page.getByText("Aucun événement dans ce round.")).toBeVisible();
+
+  const untradedDeathProof = page.getByRole("button", { name: "Voir la preuve du round 4" });
+  await expect(untradedDeathProof).toBeVisible();
+  await untradedDeathProof.click();
+  await expect(page.getByRole("button", { name: "Round 4", exact: true })).toHaveClass(/is-selected/);
 });
