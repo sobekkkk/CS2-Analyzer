@@ -120,5 +120,8 @@ def test_timeline_merges_damage_and_kills_in_tick_order_with_round_filter() -> N
         ("kill", 260),
     ]
     assert timeline[0].damage_health == 70
+    assert timeline[0].actor_name == "Enemy"
+    assert timeline[0].victim_name == "Sobek"
     assert timeline[1].weapon == "awp"
     assert timeline[3].actor_id is None
+    assert timeline[3].actor_name is None

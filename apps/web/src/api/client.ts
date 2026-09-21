@@ -20,7 +20,9 @@ export type TimelineEvent = {
   round_number: number;
   tick: number;
   actor_id: string | null;
+  actor_name: string | null;
   victim_id: string | null;
+  victim_name: string | null;
   weapon: string;
   damage_health: number | null;
 };

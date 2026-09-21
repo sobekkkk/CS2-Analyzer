@@ -24,4 +24,6 @@ tables derivees via :
 Les cellules de dommages sont des coordonnees monde agregees, pas encore des
 callouts ni un radar Mirage. La carte 5v4 conserve uniquement les positions
 echantillonnees utiles a cette regle, jamais les ticks complets. Les fichiers
-`.dem` bruts ne sont pas conserves.
+`.dem` bruts ne sont pas conserves. Les evenements de timeline exposent les
+pseudonymes observes dans la demo pour les deux joueurs concernes, mais jamais
+les SteamID bruts.

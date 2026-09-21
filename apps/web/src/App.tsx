@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Button } from "react-aria-components";
+import { useRef, useState } from "react";
+import { Button, Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
 
 import {
   choosePlayer,
@@ -18,7 +18,7 @@ import {
   type TimelineEvent,
   type UntradedDeathCell
 } from "./api/client";
-import { damageTone, displayRound } from "./features/report/rounds";
+import { damageTone } from "./features/report/rounds";
 import { createWorldViewport, worldGridPoint } from "./features/report/world-grid";
 
 type ViewState =
@@ -39,21 +39,31 @@ type ViewState =
     }
   | { kind: "error"; message: string };
 
-function friendlyEventActor(event: TimelineEvent, playerId: string): string {
-  return event.actor_id === playerId ? "Vous" : "Un autre joueur";
+function friendlyParticipant(
+  participantId: string | null,
+  participantName: string | null,
+  playerId: string
+): string {
+  if (participantId === playerId) return "Vous";
+  return participantName ?? "Joueur inconnu";
 }
 
 function Timeline({
   events,
   playerId,
-  selectedRound
+  selectedRound,
+  isLoading
 }: {
   events: TimelineEvent[];
   playerId: string;
   selectedRound: number | undefined;
+  isLoading: boolean;
 }) {
   if (selectedRound === undefined) {
     return <p className="empty-copy">Sélectionnez un round pour lire les événements sources.</p>;
+  }
+  if (isLoading) {
+    return <p className="empty-copy">Chargement des événements sources…</p>;
   }
   if (events.length === 0) {
     return <p className="empty-copy">Aucun événement dans ce round.</p>;
@@ -65,8 +75,9 @@ function Timeline({
           <span className={`event-mark event-mark--${event.kind}`} aria-hidden="true" />
           <div>
             <p>
-              <strong>{friendlyEventActor(event, playerId)}</strong>{" "}
-              {event.kind === "kill" ? "élimine" : "inflige des dégâts à"} un autre joueur
+              <strong>{friendlyParticipant(event.actor_id, event.actor_name, playerId)}</strong>{" "}
+              {event.kind === "kill" ? "élimine" : "inflige des dégâts à"}{" "}
+              <strong>{friendlyParticipant(event.victim_id, event.victim_name, playerId)}</strong>
               {event.damage_health ? ` · ${event.damage_health} HP` : ""}
             </p>
             <span>Tick {event.tick.toLocaleString("fr-FR")} · {event.weapon}</span>
@@ -74,6 +85,48 @@ function Timeline({
         </li>
       ))}
     </ol>
+  );
+}
+
+function EvidenceDialog({
+  events,
+  playerId,
+  roundNumber,
+  isLoading,
+  onClose
+}: {
+  events: TimelineEvent[];
+  playerId: string;
+  roundNumber: number | undefined;
+  isLoading: boolean;
+  onClose: () => void;
+}) {
+  if (roundNumber === undefined) return null;
+  return (
+    <ModalOverlay className="evidence-overlay" isOpen onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
+      <Modal className="evidence-modal">
+        <Dialog className="evidence-dialog">
+          {({ close }) => (
+            <>
+              <div className="evidence-dialog__heading">
+                <div>
+                  <p className="eyebrow">Événements sources</p>
+                  <Heading slot="title">Preuve du round {roundNumber + 1}</Heading>
+                </div>
+                <Button
+                  aria-label="Fermer la preuve"
+                  className="text-button"
+                  onPress={() => { close(); onClose(); }}
+                >
+                  Fermer
+                </Button>
+              </div>
+              <Timeline events={events} playerId={playerId} selectedRound={roundNumber} isLoading={isLoading} />
+            </>
+          )}
+        </Dialog>
+      </Modal>
+    </ModalOverlay>
   );
 }
 
@@ -199,12 +252,9 @@ function OpeningKillList({
 export function App() {
   const [view, setView] = useState<ViewState>({ kind: "empty" });
   const [isRoundLoading, setIsRoundLoading] = useState(false);
+  const evidenceRequestId = useRef(0);
 
   const activeReport = view.kind === "ready" ? view : null;
-  const roundNumbers = useMemo(
-    () => activeReport ? Array.from({ length: activeReport.overview.rounds_played }, (_, index) => index) : [],
-    [activeReport]
-  );
 
   async function loadReport(matchId: string, filename: string) {
     const [overview, damageCells, untradedDeathCells, openingKills, fiveVFourCells] = await Promise.all([
@@ -255,20 +305,29 @@ export function App() {
     }
   }
 
-  async function selectRound(roundNumber: number | undefined) {
-    if (!activeReport) return;
-    if (roundNumber === undefined) {
+  function closeEvidence() {
+    evidenceRequestId.current += 1;
+    setIsRoundLoading(false);
+    if (activeReport) {
       setView({ ...activeReport, timeline: [], selectedRound: undefined });
-      return;
     }
+  }
+
+  async function openEvidence(roundNumber: number) {
+    if (!activeReport) return;
+    const requestId = evidenceRequestId.current + 1;
+    evidenceRequestId.current = requestId;
     setIsRoundLoading(true);
+    setView({ ...activeReport, timeline: [], selectedRound: roundNumber });
     try {
       const timeline = await getTimeline(activeReport.overview.match_id, roundNumber);
+      if (evidenceRequestId.current !== requestId) return;
       setView({ ...activeReport, timeline, selectedRound: roundNumber });
     } catch (error) {
+      if (evidenceRequestId.current !== requestId) return;
       setView({ kind: "error", message: error instanceof Error ? error.message : "Timeline indisponible." });
     } finally {
-      setIsRoundLoading(false);
+      if (evidenceRequestId.current === requestId) setIsRoundLoading(false);
     }
   }
 
@@ -356,31 +415,6 @@ export function App() {
             </section>
 
             <div className="report-grid">
-              <section className="panel panel--timeline">
-                <div className="panel-heading">
-                  <div><p className="eyebrow">Contexte</p><h2>Timeline</h2></div>
-                  {isRoundLoading && <span className="loading-label">Mise à jour…</span>}
-                </div>
-                <div className="round-strip" aria-label="Filtrer par round">
-                  <Button className={`round-button ${activeReport.selectedRound === undefined ? "is-selected" : ""}`} onPress={() => void selectRound(undefined)}>Tous</Button>
-                  {roundNumbers.map((roundNumber) => (
-                    <Button
-                      aria-label={displayRound(roundNumber)}
-                      className={`round-button ${activeReport.selectedRound === roundNumber ? "is-selected" : ""}`}
-                      key={roundNumber}
-                      onPress={() => void selectRound(roundNumber)}
-                    >
-                      {roundNumber + 1}
-                    </Button>
-                  ))}
-                </div>
-                <Timeline
-                  events={activeReport.timeline}
-                  playerId={activeReport.overview.selected_player.id}
-                  selectedRound={activeReport.selectedRound}
-                />
-              </section>
-
               <section className="panel panel--zones">
                 <div className="panel-heading">
                   <div><p className="eyebrow">H-04 · Confiance directe</p><h2>Où vous perdez des HP</h2></div>
@@ -398,7 +432,7 @@ export function App() {
                 <p className="panel-description">Une occurrence signifie qu’aucun coéquipier n’a éliminé le même adversaire dans les 5 secondes. Cela ne prouve ni ligne de vue ni mauvaise décision.</p>
                 <UntradedDeathGrid
                   cells={activeReport.untradedDeathCells}
-                  onOpenRound={(roundNumber) => void selectRound(roundNumber)}
+                  onOpenRound={(roundNumber) => void openEvidence(roundNumber)}
                 />
               </section>
 
@@ -408,7 +442,7 @@ export function App() {
                   <span className="grid-key">Contexte round</span>
                 </div>
                 <p className="panel-description">Chaque élément est le premier kill ennemi du round. Ouvrez le round pour relire la séquence.</p>
-                <OpeningKillList kills={activeReport.openingKills} onOpenRound={(roundNumber) => void selectRound(roundNumber)} />
+                <OpeningKillList kills={activeReport.openingKills} onOpenRound={(roundNumber) => void openEvidence(roundNumber)} />
               </section>
 
               <section className="panel panel--five-v-four">
@@ -420,6 +454,13 @@ export function App() {
                 <FiveVFourGrid cells={activeReport.fiveVFourCells} />
               </section>
             </div>
+            <EvidenceDialog
+              events={activeReport.timeline}
+              isLoading={isRoundLoading}
+              onClose={closeEvidence}
+              playerId={activeReport.overview.selected_player.id}
+              roundNumber={activeReport.selectedRound}
+            />
           </>
         )}
       </main>

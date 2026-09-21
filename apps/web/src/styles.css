@@ -36,6 +36,13 @@ button { cursor: pointer; }
 .player-choice { min-height: 44px; padding: 9px 12px; text-align: left; }
 .player-choice:hover, .round-button:hover, .text-button:hover { background: #20282c; border-color: #536571; }
 .player-choice:focus-visible, .round-button:focus-visible, .text-button:focus-visible { outline: 3px solid #5dadd8; outline-offset: 2px; }
+.evidence-overlay { align-items: center; background: rgb(4 7 8 / 72%); display: flex; inset: 0; justify-content: center; padding: 24px; position: fixed; z-index: 10; }
+.evidence-modal { max-height: min(720px, 82vh); outline: 0; width: min(680px, 100%); }
+.evidence-dialog { background: #171d20; border: 1px solid #3b484e; border-radius: 7px; box-shadow: 0 20px 60px rgb(0 0 0 / 42%); display: flex; flex-direction: column; max-height: min(720px, 82vh); padding: 24px; }
+.evidence-dialog__heading { align-items: flex-start; border-bottom: 1px solid #303a40; display: flex; flex: 0 0 auto; gap: 20px; justify-content: space-between; margin-bottom: 20px; padding-bottom: 16px; }
+.evidence-dialog__heading .eyebrow { margin: 0 0 6px; }
+.evidence-dialog__heading h2 { font-size: 21px; letter-spacing: -.025em; margin: 0; }
+.evidence-dialog .timeline-list { flex: 1 1 auto; overflow-y: auto; padding-right: 12px; }
 .report-heading { border-bottom: 1px solid #30393e; margin-top: 44px; padding-bottom: 20px; }
 .report-heading h2 { font-size: 30px; letter-spacing: -.035em; margin: 4px 0; }
 .text-button { font-size: 13px; padding: 8px 10px; }

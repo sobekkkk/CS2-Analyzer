@@ -63,6 +63,9 @@ def timeline_for_match(
 ) -> list[TimelineEvent]:
     """Fusionne les faits bruts utiles a la relecture d'un round."""
     events: list[TimelineEvent] = []
+    participant_names = {
+        participant.id: participant.display_name for participant in match.inspection.participants
+    }
     damages = match.damages
     kills = match.kills
     if round_number is not None:
@@ -76,7 +79,9 @@ def timeline_for_match(
                 round_number=int(damage.round_number),
                 tick=int(damage.tick),
                 actor_id=_optional_text(damage.attacker_id),
+                actor_name=participant_names.get(_optional_text(damage.attacker_id)),
                 victim_id=_optional_text(damage.victim_id),
+                victim_name=participant_names.get(_optional_text(damage.victim_id)),
                 weapon=str(damage.weapon),
                 damage_health=int(damage.damage_health),
             )
@@ -88,7 +93,9 @@ def timeline_for_match(
                 round_number=int(kill.round_number),
                 tick=int(kill.tick),
                 actor_id=_optional_text(kill.killer_id),
+                actor_name=participant_names.get(_optional_text(kill.killer_id)),
                 victim_id=_optional_text(kill.victim_id),
+                victim_name=participant_names.get(_optional_text(kill.victim_id)),
                 weapon=str(kill.weapon),
             )
         )
