@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "./App";
@@ -49,8 +49,11 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: "Vos premiers kills" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Voir la timeline du round 1" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Où vous êtes après un avantage 5v4" })).toBeVisible();
-    expect(screen.getByLabelText(/Cellule 1, -2, 3 positions observées après un 5v4/i)).toBeVisible();
+    expect(screen.getByRole("button", { name: /Voir la preuve du round 4 : cellule 1, -2, 3 positions observées après un 5v4/i })).toBeVisible();
     expect(screen.getByLabelText("Carte de grille monde : positions après un avantage 5v4")).toBeVisible();
+    const fiveVFourPanel = screen.getByRole("heading", { name: "Où vous êtes après un avantage 5v4" }).closest("section");
+    expect(fiveVFourPanel).not.toBeNull();
+    expect(within(fiveVFourPanel!).getByRole("button", { name: /Voir la preuve du round 4/i })).toBeVisible();
     expect(screen.queryByRole("heading", { name: "Timeline" })).not.toBeInTheDocument();
     expect(screen.queryByText("Sélectionnez un round pour lire les événements sources.")).not.toBeInTheDocument();
 
@@ -80,5 +83,11 @@ describe("App", () => {
     await waitFor(() => {
       expect(screen.getByLabelText("Événements du round")).toHaveTextContent("Enemy inflige des dégâts à Vous · 32 HP");
     });
+
+    fireEvent.click(screen.getByRole("button", { name: "Fermer la preuve" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+
+    fireEvent.click(within(fiveVFourPanel!).getByRole("button", { name: /Voir la preuve du round 4/i }));
+    expect(await screen.findByRole("dialog", { name: "Preuve du round 4" })).toBeVisible();
   });
 });

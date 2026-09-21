@@ -202,7 +202,13 @@ function UntradedDeathGrid({
   );
 }
 
-function FiveVFourGrid({ cells }: { cells: FiveVFourCell[] }) {
+function FiveVFourGrid({
+  cells,
+  onOpenRound
+}: {
+  cells: FiveVFourCell[];
+  onOpenRound: (roundNumber: number) => void;
+}) {
   if (cells.length === 0) {
     return <p className="empty-copy">Aucune position fiable après un avantage 5v4 dans cette démo.</p>;
   }
@@ -217,16 +223,17 @@ function FiveVFourGrid({ cells }: { cells: FiveVFourCell[] }) {
         const point = worldGridPoint(cell, viewport);
         const intensity = damageTone(cell.sample_count, maximumSamples);
         return (
-          <article
+          <Button
             className={`world-cell world-cell--intensity-${intensity}`}
             key={`${cell.cell_x}-${cell.cell_y}`}
-            aria-label={`Cellule ${cell.cell_x}, ${cell.cell_y}, ${cell.sample_count} positions observées après un 5v4`}
+            aria-label={`Voir la preuve du round ${(cell.round_numbers[0] ?? 0) + 1} : cellule ${cell.cell_x}, ${cell.cell_y}, ${cell.sample_count} positions observées après un 5v4`}
+            onPress={() => onOpenRound(cell.round_numbers[0] ?? 0)}
             style={{ left: `${point.left}%`, top: `${point.top}%` }}
           >
             <strong>{cell.sample_count}</strong>
             <span>{cell.cell_x} / {cell.cell_y}</span>
-            <small>{cell.round_count} round{cell.round_count > 1 ? "s" : ""}</small>
-          </article>
+            <small>{cell.round_count} round{cell.round_count > 1 ? "s" : ""} · preuve</small>
+          </Button>
         );
       })}
     </div>
@@ -467,7 +474,10 @@ export function App() {
                   <span className="grid-key">Grille monde</span>
                 </div>
                 <p className="panel-description">Positions relevées chaque seconde pendant les six secondes qui suivent un passage exact à 5v4, jusqu’au frag suivant ou à la fin du round. Ce contexte ne qualifie pas une décision.</p>
-                <FiveVFourGrid cells={activeReport.fiveVFourCells} />
+                <FiveVFourGrid
+                  cells={activeReport.fiveVFourCells}
+                  onOpenRound={(roundNumber) => void openEvidence(roundNumber)}
+                />
               </section>
             </div>
             <EvidenceDialog

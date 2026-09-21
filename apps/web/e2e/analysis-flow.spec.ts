@@ -77,7 +77,7 @@ test("a local import reaches the player report without a real demo upload", asyn
   await expect(page.getByRole("heading", { name: "Où vos morts ne sont pas suivies d’un trade" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Vos premiers kills" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Où vous êtes après un avantage 5v4" })).toBeVisible();
-  await expect(page.getByLabel(/Cellule 1, -2, 3 positions observées après un 5v4/i)).toBeVisible();
+  await expect(page.getByRole("button", { name: /Voir la preuve du round 4 : cellule 1, -2, 3 positions observées après un 5v4/i })).toBeVisible();
   await expect(page.getByLabel("Carte de grille monde : positions après un avantage 5v4")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Timeline" })).toHaveCount(0);
   const openingKill = page.getByRole("button", { name: "Voir la timeline du round 1" });
@@ -88,7 +88,7 @@ test("a local import reaches the player report without a real demo upload", asyn
   await page.getByRole("button", { name: "Fermer la preuve" }).click();
   await expect(page.getByRole("dialog", { name: "Preuve du round 1" })).toHaveCount(0);
 
-  const untradedDeathProof = page.getByRole("button", { name: "Voir la preuve du round 4" });
+  const untradedDeathProof = page.locator("section.panel--untraded").getByRole("button", { name: "Voir la preuve du round 4" });
   await expect(untradedDeathProof).toBeVisible();
   await untradedDeathProof.click();
   await expect(page.getByRole("dialog", { name: "Preuve du round 4" })).toBeVisible();
@@ -98,4 +98,9 @@ test("a local import reaches the player report without a real demo upload", asyn
   await expect(damageProof).toBeVisible();
   await damageProof.click();
   await expect(page.getByRole("dialog", { name: "Preuve du round 1" })).toBeVisible();
+  await page.getByRole("button", { name: "Fermer la preuve" }).click();
+
+  const fiveVFourProof = page.locator("section.panel--five-v-four").getByRole("button", { name: /Voir la preuve du round 4/i });
+  await fiveVFourProof.click();
+  await expect(page.getByRole("dialog", { name: "Preuve du round 4" })).toBeVisible();
 });
