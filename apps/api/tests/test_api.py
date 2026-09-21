@@ -258,30 +258,12 @@ def test_exposes_saved_match_overview_and_filtered_timeline(tmp_path, monkeypatc
             "evidence": [
                 {"round_number": 2, "tick": 180, "kind": "kill"},
             ],
-        },
-        {
-            "id": "H-02:1:80",
-            "rule_id": "H-02",
-            "rule_version": "0.1",
-            "title": "Premier kill du round",
-            "observation": "Vous obtenez le premier kill adverse du round 2.",
-            "confidence": "direct",
-            "occurrence_count": 1,
-            "evidence": [
-                {"round_number": 1, "tick": 80, "kind": "kill"},
-            ],
-        },
-        {
-            "id": "H-03:1:-2",
-            "rule_id": "H-03",
-            "rule_version": "0.1",
-            "title": "Position après un avantage 5v4",
-            "observation": "1 position relevée dans cette zone après un avantage 5v4.",
-            "confidence": "inferred",
-            "occurrence_count": 1,
-            "evidence": [
-                {"round_number": 1, "tick": 144, "kind": "position_sample"},
-            ],
+            "priority_score": 75,
+            "priority_level": "review",
+            "priority_reasons": ["impact", "inferred_context"],
+            "recommendation": (
+                "Ouvrez le round source pour vérifier la séquence avant d’en tirer une conclusion."
+            ),
         },
         {
             "id": "H-04:1:-2",
@@ -294,5 +276,43 @@ def test_exposes_saved_match_overview_and_filtered_timeline(tmp_path, monkeypatc
             "evidence": [
                 {"round_number": 2, "tick": 150, "kind": "damage"},
             ],
+            "priority_score": 63,
+            "priority_level": "review",
+            "priority_reasons": ["impact", "direct_evidence"],
+            "recommendation": (
+                "Relisez le round source avant d’en déduire une habitude de positionnement."
+            ),
+        },
+        {
+            "id": "H-03:1:-2",
+            "rule_id": "H-03",
+            "rule_version": "0.1",
+            "title": "Position après un avantage 5v4",
+            "observation": "1 position relevée dans cette zone après un avantage 5v4.",
+            "confidence": "inferred",
+            "occurrence_count": 1,
+            "evidence": [
+                {"round_number": 1, "tick": 144, "kind": "position_sample"},
+            ],
+            "priority_score": 29,
+            "priority_level": "context",
+            "priority_reasons": ["inferred_context"],
+            "recommendation": "Comparez ce placement à la suite du round source.",
+        },
+        {
+            "id": "H-02:1:80",
+            "rule_id": "H-02",
+            "rule_version": "0.1",
+            "title": "Premier kill du round",
+            "observation": "Vous obtenez le premier kill adverse du round 2.",
+            "confidence": "direct",
+            "occurrence_count": 1,
+            "evidence": [
+                {"round_number": 1, "tick": 80, "kind": "kill"},
+            ],
+            "priority_score": 28,
+            "priority_level": "context",
+            "priority_reasons": ["direct_evidence"],
+            "recommendation": "Relisez le premier duel dans le round source.",
         },
     ]

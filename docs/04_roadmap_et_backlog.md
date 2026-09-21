@@ -56,10 +56,10 @@ Le contrat complet est dans [`09_design_system.md`](09_design_system.md).
 
 ### EPIC D - Coaching explicable
 
-- D1. Format d'evidence commun pour une `Insight`. **Moteur et API termines le 21 septembre 2026** : chaque signal H-01 a H-04 expose une observation descriptive, sa regle, sa confiance, son nombre d'occurrences et une ou plusieurs preuves `{round_number, tick, kind}`. Aucun scoring ni jugement n'est introduit dans ce lot.
-- D2. Scoring impact x repetition x confiance.
-- D3. Vue detail et recommandation courte.
-- D4. Libelle "signal a verifier" si la confiance est inferee.
+- D1. Format d'evidence commun pour une `Insight`. **Moteur et API termines le 21 septembre 2026** : chaque signal H-01 a H-04 expose une observation descriptive, sa regle, sa confiance, son nombre d'occurrences et une ou plusieurs preuves `{round_number, tick, kind}`.
+- D2. Scoring impact x repetition x confiance. **Termine le 21 septembre 2026** : l'API ordonne les observations avec un score de lecture borne et versionne ; ce score n'est jamais affiche comme une note de joueur.
+- D3. Vue detail et recommandation courte. **Termine le 21 septembre 2026** : le rapport montre les trois a cinq signaux prioritaires, une recommandation de relecture et ouvre directement le round source.
+- D4. Libelle "signal a verifier" si la confiance est inferee. **Termine le 21 septembre 2026** : les observations inferees sont explicitement presentees comme des signaux a verifier, distincts des preuves directes.
 
 **Definition of done :** aucune insight ne peut etre affichee sans round, moment, regle et preuve associes.
 

@@ -61,6 +61,27 @@ export type FiveVFourCell = {
   round_numbers: number[];
 };
 
+export type InsightEvidence = {
+  round_number: number;
+  tick: number;
+  kind: "damage" | "kill" | "position_sample";
+};
+
+export type Insight = {
+  id: string;
+  rule_id: "H-01" | "H-02" | "H-03" | "H-04";
+  rule_version: string;
+  title: string;
+  observation: string;
+  confidence: "direct" | "inferred";
+  occurrence_count: number;
+  evidence: InsightEvidence[];
+  priority_score: number;
+  priority_level: "review" | "context";
+  priority_reasons: ("impact" | "repetition" | "direct_evidence" | "inferred_context")[];
+  recommendation: string;
+};
+
 export class ApiError extends Error {
   constructor(message: string) {
     super(message);
@@ -116,4 +137,8 @@ export function getOpeningKills(matchId: string): Promise<OpeningKill[]> {
 
 export function getFiveVFourCells(matchId: string): Promise<FiveVFourCell[]> {
   return request(`/matches/${matchId}/heatmaps/five-vs-four`);
+}
+
+export function getInsights(matchId: string): Promise<Insight[]> {
+  return request(`/matches/${matchId}/insights`);
 }
