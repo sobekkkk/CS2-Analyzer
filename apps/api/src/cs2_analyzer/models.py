@@ -74,3 +74,24 @@ class TimelineEvent(BaseModel):
     victim_name: str | None
     weapon: str
     damage_health: int | None = None
+
+
+class Evidence(BaseModel):
+    """Fait source minimal permettant de relire une observation."""
+
+    round_number: int
+    tick: int
+    kind: Literal["damage", "kill", "position_sample"]
+
+
+class Insight(BaseModel):
+    """Observation de coaching descriptive, toujours rattachee a ses faits."""
+
+    id: str
+    rule_id: Literal["H-01", "H-02", "H-03", "H-04"]
+    rule_version: str
+    title: str
+    observation: str
+    confidence: Literal["direct", "inferred"]
+    occurrence_count: int = Field(ge=1)
+    evidence: list[Evidence] = Field(min_length=1)

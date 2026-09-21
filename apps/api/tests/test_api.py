@@ -199,6 +199,7 @@ def test_exposes_saved_match_overview_and_filtered_timeline(tmp_path, monkeypatc
     five_v_four_cells = client.get(
         f"/api/v1/matches/{'d' * 16}/heatmaps/five-vs-four?cell_size=256"
     )
+    insights = client.get(f"/api/v1/matches/{'d' * 16}/insights")
 
     assert overview.status_code == 200
     assert overview.json()["selected_player"]["display_name"] == "Sobek"
@@ -239,5 +240,59 @@ def test_exposes_saved_match_overview_and_filtered_timeline(tmp_path, monkeypatc
             "round_count": 1,
             "round_numbers": [1],
             "confidence": "inferred",
+            "evidence": [
+                {"round_number": 1, "tick": 144, "kind": "position_sample"},
+            ],
         }
+    ]
+    assert insights.status_code == 200
+    assert insights.json() == [
+        {
+            "id": "H-01:1:-2",
+            "rule_id": "H-01",
+            "rule_version": "0.1",
+            "title": "Morts sans trade observées",
+            "observation": "1 mort non suivie d’un trade dans cette zone de grille.",
+            "confidence": "inferred",
+            "occurrence_count": 1,
+            "evidence": [
+                {"round_number": 2, "tick": 180, "kind": "kill"},
+            ],
+        },
+        {
+            "id": "H-02:1:80",
+            "rule_id": "H-02",
+            "rule_version": "0.1",
+            "title": "Premier kill du round",
+            "observation": "Vous obtenez le premier kill adverse du round 2.",
+            "confidence": "direct",
+            "occurrence_count": 1,
+            "evidence": [
+                {"round_number": 1, "tick": 80, "kind": "kill"},
+            ],
+        },
+        {
+            "id": "H-03:1:-2",
+            "rule_id": "H-03",
+            "rule_version": "0.1",
+            "title": "Position après un avantage 5v4",
+            "observation": "1 position relevée dans cette zone après un avantage 5v4.",
+            "confidence": "inferred",
+            "occurrence_count": 1,
+            "evidence": [
+                {"round_number": 1, "tick": 144, "kind": "position_sample"},
+            ],
+        },
+        {
+            "id": "H-04:1:-2",
+            "rule_id": "H-04",
+            "rule_version": "0.1",
+            "title": "HP perdus dans cette zone",
+            "observation": "70 HP reçus sur 1 impact dans cette zone de grille.",
+            "confidence": "direct",
+            "occurrence_count": 1,
+            "evidence": [
+                {"round_number": 2, "tick": 150, "kind": "damage"},
+            ],
+        },
     ]

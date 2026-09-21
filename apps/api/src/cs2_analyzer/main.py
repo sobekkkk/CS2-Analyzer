@@ -10,6 +10,7 @@ from .inspection import MAX_DEMO_SIZE_BYTES, DemoInspectionError, DemoInspector
 from .models import (
     AnalysisReady,
     ErrorResponse,
+    Insight,
     MatchOverview,
     PendingAnalysis,
     PlayerSelection,
@@ -17,7 +18,7 @@ from .models import (
 )
 from .normalization import DemoNormalizer
 from .profile import LocalProfileStore
-from .report import build_match_overview, timeline_for_match
+from .report import build_match_overview, insights_for_match, timeline_for_match
 from .rules import (
     DamageCell,
     FiveVFourCell,
@@ -75,6 +76,17 @@ def match_timeline(
 ) -> list[TimelineEvent]:
     stored = _stored_match_or_404(match_id)
     return timeline_for_match(stored.match, round_number=round_number)
+
+
+@app.get(
+    "/api/v1/matches/{match_id}/insights",
+    response_model=list[Insight],
+    responses={404: {"model": ErrorResponse}},
+)
+def match_insights(match_id: str) -> list[Insight]:
+    """Expose les signaux dans un contrat commun avec leurs preuves brutes."""
+    stored = _stored_match_or_404(match_id)
+    return insights_for_match(stored.match, stored.selected_player_id)
 
 
 @app.get(

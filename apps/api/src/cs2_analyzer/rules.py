@@ -7,6 +7,8 @@ from typing import Literal
 import pandas as pd
 from pydantic import BaseModel
 
+from .models import Evidence
+
 
 class OpeningKill(BaseModel):
     """Preuve H-02 : premier kill ennemi d'un round par le joueur cible."""
@@ -33,6 +35,7 @@ class DamageCell(BaseModel):
     round_numbers: list[int]
     average_damage_per_impact: float
     confidence: str = "direct"
+    evidence: list[Evidence]
 
 
 class TradeAssessment(BaseModel):
@@ -69,6 +72,7 @@ class UntradedDeathCell(BaseModel):
     round_numbers: list[int]
     death_ticks: list[int]
     confidence: str = "inferred"
+    evidence: list[Evidence]
 
 
 class FiveVFourCell(BaseModel):
@@ -82,6 +86,7 @@ class FiveVFourCell(BaseModel):
     round_count: int
     round_numbers: list[int]
     confidence: str = "inferred"
+    evidence: list[Evidence]
 
 
 @dataclass(frozen=True)
@@ -260,6 +265,17 @@ def five_v_four_cells_for_player(
             sample_count=len(samples_in_cell),
             round_count=len({window.round_number for window, _ in samples_in_cell}),
             round_numbers=sorted({window.round_number for window, _ in samples_in_cell}),
+            evidence=sorted(
+                [
+                    Evidence(
+                        round_number=window.round_number,
+                        tick=int(sample["tick"]),
+                        kind="position_sample",
+                    )
+                    for window, sample in samples_in_cell
+                ],
+                key=lambda evidence: (evidence.round_number, evidence.tick),
+            ),
         )
         for (cell_x, cell_y), samples_in_cell in grouped.items()
     ]
@@ -390,6 +406,17 @@ def untraded_death_cells_for_player(
             round_count=len({assessment.round_number for assessment in assessments_in_cell}),
             round_numbers=sorted({assessment.round_number for assessment in assessments_in_cell}),
             death_ticks=sorted(assessment.death_tick for assessment in assessments_in_cell),
+            evidence=sorted(
+                [
+                    Evidence(
+                        round_number=assessment.round_number,
+                        tick=assessment.death_tick,
+                        kind="kill",
+                    )
+                    for assessment in assessments_in_cell
+                ],
+                key=lambda evidence: (evidence.round_number, evidence.tick),
+            ),
         )
         for (cell_x, cell_y), assessments_in_cell in grouped.items()
     ]
@@ -436,6 +463,7 @@ def damage_cells_for_player(
 
     required_columns = {
         "round_number",
+        "tick",
         "victim_id",
         "damage_health",
         "victim_x",
@@ -477,6 +505,17 @@ def damage_cells_for_player(
                 round_count=len(round_numbers),
                 round_numbers=round_numbers,
                 average_damage_per_impact=total_damage / impact_count,
+                evidence=sorted(
+                    [
+                        Evidence(
+                            round_number=int(damage.round_number),
+                            tick=int(damage.tick),
+                            kind="damage",
+                        )
+                        for damage in cell_damages.itertuples(index=False)
+                    ],
+                    key=lambda evidence: (evidence.round_number, evidence.tick),
+                ),
             )
         )
     return sorted(

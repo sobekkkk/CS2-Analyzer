@@ -131,6 +131,9 @@ def test_untraded_death_cells_only_keep_eligible_untraded_deaths_with_positions(
     assert result[0].occurrence_count == 1
     assert result[0].round_numbers == [4]
     assert result[0].death_ticks == [400]
+    assert [evidence.model_dump() for evidence in result[0].evidence] == [
+        {"round_number": 4, "tick": 400, "kind": "kill"},
+    ]
 
 
 def test_trade_assessments_do_not_infer_time_without_a_tick_interval() -> None:
