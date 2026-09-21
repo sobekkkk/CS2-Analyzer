@@ -69,6 +69,8 @@ class TimelineEvent(BaseModel):
     round_number: int
     tick: int
     actor_id: str | None
+    actor_name: str | None
     victim_id: str | None
+    victim_name: str | None
     weapon: str
     damage_health: int | None = None

@@ -30,7 +30,21 @@ test("a local import reaches the player report without a real demo upload", asyn
     });
   });
   await page.route("**/api/v1/matches/match-1/timeline**", async (route) => {
-    await route.fulfill({ json: [] });
+    await route.fulfill({
+      json: [
+        {
+          kind: "damage",
+          round_number: 0,
+          tick: 90,
+          actor_id: "opponent",
+          actor_name: "Opponent",
+          victim_id: "target",
+          victim_name: "Sobek",
+          weapon: "ak47",
+          damage_health: 16
+        }
+      ]
+    });
   });
   await page.route("**/api/v1/matches/match-1/heatmaps/damage", async (route) => {
     await route.fulfill({ json: [] });
@@ -68,7 +82,7 @@ test("a local import reaches the player report without a real demo upload", asyn
   await expect(openingKill).toBeVisible();
   await openingKill.click();
   await expect(page.getByRole("dialog", { name: "Preuve du round 1" })).toBeVisible();
-  await expect(page.getByText("Aucun événement dans ce round.")).toBeVisible();
+  await expect(page.getByText("Opponent inflige des dégâts à Vous · 16 HP")).toBeVisible();
   await page.getByRole("button", { name: "Fermer la preuve" }).click();
   await expect(page.getByRole("dialog", { name: "Preuve du round 1" })).toHaveCount(0);
 

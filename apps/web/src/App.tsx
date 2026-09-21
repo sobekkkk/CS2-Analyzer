@@ -39,8 +39,13 @@ type ViewState =
     }
   | { kind: "error"; message: string };
 
-function friendlyEventActor(event: TimelineEvent, playerId: string): string {
-  return event.actor_id === playerId ? "Vous" : "Un autre joueur";
+function friendlyParticipant(
+  participantId: string | null,
+  participantName: string | null,
+  playerId: string
+): string {
+  if (participantId === playerId) return "Vous";
+  return participantName ?? "Joueur inconnu";
 }
 
 function Timeline({
@@ -70,8 +75,9 @@ function Timeline({
           <span className={`event-mark event-mark--${event.kind}`} aria-hidden="true" />
           <div>
             <p>
-              <strong>{friendlyEventActor(event, playerId)}</strong>{" "}
-              {event.kind === "kill" ? "élimine" : "inflige des dégâts à"} un autre joueur
+              <strong>{friendlyParticipant(event.actor_id, event.actor_name, playerId)}</strong>{" "}
+              {event.kind === "kill" ? "élimine" : "inflige des dégâts à"}{" "}
+              <strong>{friendlyParticipant(event.victim_id, event.victim_name, playerId)}</strong>
               {event.damage_health ? ` · ${event.damage_health} HP` : ""}
             </p>
             <span>Tick {event.tick.toLocaleString("fr-FR")} · {event.weapon}</span>

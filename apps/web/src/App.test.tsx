@@ -29,9 +29,9 @@ describe("App", () => {
       if (url.endsWith("/heatmaps/untraded-deaths")) return response([{ cell_x: 1, cell_y: -2, occurrence_count: 2, round_count: 2, round_numbers: [3, 7], death_ticks: [1200, 2400] }]);
       if (url.endsWith("/highlights/opening-kills")) return response([{ round_number: 0, tick: 80, weapon: "ak47" }]);
       if (url.endsWith("/heatmaps/five-vs-four")) return response([{ cell_x: 1, cell_y: -2, sample_count: 3, round_count: 2, round_numbers: [3, 7] }]);
-      if (url.includes("/timeline?round_number=0")) return response([{ kind: "kill", round_number: 0, tick: 90, actor_id: "target", victim_id: "enemy", weapon: "ak47" }]);
-      if (url.includes("/timeline?round_number=3")) return response([{ kind: "kill", round_number: 3, tick: 1200, actor_id: "enemy", victim_id: "target", weapon: "m4a1" }]);
-      if (url.endsWith("/timeline")) return response([{ kind: "kill", round_number: 0, tick: 90, actor_id: "target", victim_id: "enemy", weapon: "ak47" }]);
+      if (url.includes("/timeline?round_number=0")) return response([{ kind: "kill", round_number: 0, tick: 90, actor_id: "target", actor_name: "Sobek", victim_id: "enemy", victim_name: "Enemy", weapon: "ak47" }]);
+      if (url.includes("/timeline?round_number=3")) return response([{ kind: "kill", round_number: 3, tick: 1200, actor_id: "enemy", actor_name: "Enemy", victim_id: "target", victim_name: "Sobek", weapon: "m4a1" }]);
+      if (url.endsWith("/timeline")) return response([{ kind: "kill", round_number: 0, tick: 90, actor_id: "target", actor_name: "Sobek", victim_id: "enemy", victim_name: "Enemy", weapon: "ak47" }]);
       throw new Error(`Unhandled request: ${url}`);
     }));
 
@@ -57,6 +57,7 @@ describe("App", () => {
     expect(await screen.findByRole("dialog", { name: "Preuve du round 1" })).toBeVisible();
     expect(await screen.findByLabelText("Événements du round")).toBeVisible();
     expect(screen.getByText("Vous")).toBeVisible();
+    expect(screen.getByText("Enemy")).toBeVisible();
 
     fireEvent.click(screen.getByRole("button", { name: "Fermer la preuve" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
@@ -65,7 +66,7 @@ describe("App", () => {
 
     expect(await screen.findByRole("dialog", { name: "Preuve du round 4" })).toBeVisible();
     await waitFor(() => {
-      expect(screen.getByLabelText("Événements du round")).toHaveTextContent("Un autre joueur élimine un autre joueur");
+      expect(screen.getByLabelText("Événements du round")).toHaveTextContent("Enemy élimine Vous");
     });
   });
 });
